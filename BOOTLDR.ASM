@@ -5,6 +5,7 @@ PDEST:	EQU	0xE000
 PCOUNT:	EQU	0x0FFF
 	ORG	0
 
+; Wait a few nops to make sure that all devices have been brought out of reset
 	NOP
 	NOP
 	NOP
@@ -53,7 +54,7 @@ MAIN	EQU	$
 
 	DI
 
-	; Set pointer to 0xFFFF
+	; Set pointer to 0xFFFF, top of address space
 	LD	HL,0xFFFF
 TEST	EQU	$
 	; Store 0x55
