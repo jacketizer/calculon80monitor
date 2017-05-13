@@ -1,96 +1,76 @@
-; DEFINITIONS
-; -----------------------------------------------------------------------------
-PSTART:	EQU	0x0200
-PDEST:	EQU	0xE000
-PCOUNT:	EQU	0x0FFF
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                              ;
+; CALCULON/80 BOOTLOADER                                                       ;
+; COPYRIGHT JACK ENGQVIST JOHANSSON                                            ;
+;                                                                              ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; RAM Layout
+; ------------------------------------------------------------------------------
+RAM_MAIN	EQU	0xE000	; Start of Main Program in RAM
+MAIN_SIZE	EQU	0x0F00	; Size of Main Program
+
+; ROM Layout
+; ------------------------------------------------------------------------------
+ROM_MAIN	EQU	0x0030	; Start of Main Program in ROM
+
 	ORG	0
 
-; Wait a few nops to make sure that all devices have been brought out of reset
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
-	NOP
+; BOOTLOADER
+; ******************************************************************************
+; Program: ROM Resident Bootloader
+; Purpose: Test higher RAM, copy Main Program to RAM and then run it.
+; ------------------------------------------------------------------------------
+	DI			; Make sure interrupts are disabled
 
-	JR	MAIN
+	LD	B,0xFF		; Wait a moment to make sure that all devices
+	DEC	B		; have been brought out of reset
+	JR	NZ,$-1
 
-; MEMORY TEST
-; -----------------------------------------------------------------------------
-MTEXT	DB	"Testing Memory..."
-	DEFB	NULL
-ETEXT	DB	"Found memory error!"
-	DEFB	NULL
-DTEXT	DB	"Done"
-	DEFB	NULL
+; RAMTEST
+; ******************************************************************************
+; Procedure: RAM Test (High)
+; Purpose:   Test the higher RAM locations by writing and reading two different
+;            bit patterns (0x00 and 0xFF).
+; ------------------------------------------------------------------------------
+RAMTEST:
+	LD	HL,0xE000	; Start of memory
+	LD	BC,0x2000	; Number of bytes to test
 
-ERROR	EQU	$
-	LD	HL,ETEXT
-	CALL	PRL
-	HALT
-
-DONE	EQU	$
-	LD	HL,DTEXT
-	CALL	PRL
-	JR	COPY
-
-MAIN	EQU	$
-	LD	HL,MTEXT
-	CALL	PRL
-
-	DI
-
-	; Set pointer to 0xFFFF, top of address space
-	LD	HL,0xFFFF
-TEST	EQU	$
-	; Store 0x55
-	LD	(HL),0x55
-	; Load byte and verify
-	LD	A,(HL)
-	CP	0x55
-	JP	NZ,ERROR
-	; Store 0xAA
-	LD	(HL),0xAA
-	; Load byte and verify
-	LD	A,(HL)
-	CP	0xAA
+NEXT:	XOR	A		; Reset bits
+	LD	(HL),A		; Store 0x00
+	CP	(HL)		; and verify
 	JR	NZ,ERROR
-	; Bottom of memory?
-	LD	A,0x20
-	CP	H	; Check H for 0
-	JP	NZ,NEXT
-	XOR	A
-	CP	L	; Check L for 0
-	JP	NZ,NEXT
-	JR	DONE
-NEXT:	EQU	$
-	; Next byte
-	DEC	HL
-	JR	TEST
 
+	CPL			; Flip bits
+	LD	(HL),A		; Store 0xFF
+	CPI			; Test (HL), increase HL, decrease and test BC
+	JR	NZ,ERROR
+	JP	M,NEXT		; If BC != 0 then continue to NEXT
+				; No errors and BC is 0, continue to COPY_MAIN
+; ------------------------------------------------------------------------------
+; END: RAMTEST
+; ------------------------------------------------------------------------------
 
-; COPY BIOS TO HIGHER RAM 
-; -----------------------------------------------------------------------------
-COPY	EQU	$
-	LD	HL,PSTART	; Source
-	LD	DE,PDEST	; Destination
-	LD	BC,PCOUNT	; Number of bytes
+; COPY_MAIN
+; ******************************************************************************
+; Procedure: Copy Main Program to RAM
+; Purpose:   Copy the Main Program to RAM.
+; ------------------------------------------------------------------------------
+COPY_MAIN:
+	LD	HL,ROM_MAIN			; Source
+	LD	DE,RAM_MAIN			; Destination
+	LD	BC,MAIN_SIZE			; Number of bytes
 	LDIR
+; ------------------------------------------------------------------------------
+; END: COPY_MAIN
+; ------------------------------------------------------------------------------
 
-	JP	PDEST		; Run from higher RAM
+	JP	RAM_MAIN	; Run Main Program
 
-	DS	PSTART - $	; Fill up unused space
+ERROR:	HALT			; Halt on error
+
+	DS	ROM_MAIN-$	; Fill up unused space
+; ------------------------------------------------------------------------------
+; END: ROM Resident Bootloader
+; ------------------------------------------------------------------------------
