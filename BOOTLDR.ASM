@@ -28,7 +28,7 @@ ROM_MAIN	EQU	0x0030	; Start of Main Program in ROM
 	JR	NZ,$-1
 
 ; RAMTEST
-; ******************************************************************************
+; ------------------------------------------------------------------------------
 ; Procedure: RAM Test (High)
 ; Purpose:   Test the higher RAM locations by writing and reading two different
 ;            bit patterns (0x00 and 0xFF).
@@ -49,28 +49,26 @@ NEXT:	XOR	A		; Reset bits
 	JP	M,NEXT		; If BC != 0 then continue to NEXT
 				; No errors and BC is 0, continue to COPY_MAIN
 ; ------------------------------------------------------------------------------
-; END: RAMTEST
-; ------------------------------------------------------------------------------
 
 ; COPY_MAIN
-; ******************************************************************************
+; ------------------------------------------------------------------------------
 ; Procedure: Copy Main Program to RAM
 ; Purpose:   Copy the Main Program to RAM.
 ; ------------------------------------------------------------------------------
 COPY_MAIN:
-	LD	HL,ROM_MAIN			; Source
-	LD	DE,RAM_MAIN			; Destination
-	LD	BC,MAIN_SIZE			; Number of bytes
+	LD	HL,ROM_MAIN	; Source
+	LD	DE,RAM_MAIN	; Destination
+	LD	BC,MAIN_SIZE	; Number of bytes
 	LDIR
-; ------------------------------------------------------------------------------
-; END: COPY_MAIN
 ; ------------------------------------------------------------------------------
 
 	JP	RAM_MAIN	; Run Main Program
 
 ERROR:	HALT			; Halt on error
 
-	DS	ROM_MAIN-$	; Fill up unused space
 ; ------------------------------------------------------------------------------
 ; END: ROM Resident Bootloader
 ; ------------------------------------------------------------------------------
+
+	DS	ROM_MAIN-$	; Fill up unused space
+	END
