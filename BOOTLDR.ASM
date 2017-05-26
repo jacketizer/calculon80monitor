@@ -8,7 +8,7 @@
 ; RAM Layout
 ; ------------------------------------------------------------------------------
 RAM_MAIN	EQU	0xE000	; Start of Main Program in RAM
-MAIN_SIZE	EQU	0x0F00	; Size of Main Program
+MAIN_SIZE	EQU	0x0FF0	; Size of Main Program
 
 ; ROM Layout
 ; ------------------------------------------------------------------------------

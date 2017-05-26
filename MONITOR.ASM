@@ -1,9 +1,10 @@
 ; DEVICE ADDRESSES
 ; ----------------
-BANK	EQU	0x00	; Address to BANK SWITCHING DEVICE
-OUTP	EQU	0x0C	; Address to Output Port
-DART_D	EQU	0x10	; Address to Z80DART Data register
-DART_C	EQU	0x11	; Address to Z80DART Control register
+BANK		EQU	0x00	; Bank Switching Device
+OUTP		EQU	0x0C	; Output Port A
+OUT_A		EQU	0x0C	; Output Port A
+DART_D		EQU	0x10	; Z80DART Data register
+DART_C		EQU	0x11	; Z80DART Control register
 HDD_DATA	EQU	0x18	; IDE Host interface - Data
 HDD_ERROR	EQU	0x19	; IDE Host interface - Error
 HDD_SECT_COUNT	EQU	0x1A	; IDE Host interface - Sector count
@@ -18,8 +19,8 @@ STACK		EQU	0xFFFF	; Start of stack
 
 ; PROGRAM START
 ; -----------------------------------------------------------------------------
-	ORG	0
-	;ORG	0xE000
+	ORG	0	; Use this address in case of stand alone program
+	;ORG	0xE000	; Use this address in case of ROM resident program
 PRG:	EQU	$
 ; -----------------------------------------------------------------------------
 
