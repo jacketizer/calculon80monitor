@@ -42,7 +42,7 @@ MAIN:
 	LD	BC,ISR_TIMER_0
 	CALL	ISR_INSTALL
 
-	CALL	ISR_ENABLE		; Enable Interrupts
+	EI				; Enable Interrupts
 
 	; Start Timer 0
 	LD	C,0x00			; Timer 0
@@ -51,20 +51,20 @@ MAIN:
 	LD	C,0x00			; Timer 0
 	CALL	CTC_ENABLE_INT		; Enable interrupts
 
-	LD	A,0xFF
-	OUT	(0x0C),A
-	JP	FOREVER			; Wait for interrupts
+	LD	D,0xFF
+	HALT				; Wait for interrupts
 
-FOREVER:
-	NOP
-	JP	FOREVER
 
 ISR_TIMER_0:
 	DI
 
-	; Display
+	LD	A,D
 	CPL
-	OUT	(0x0C),A
+	LD	D,A
+
+	LD	B,A
+	LD	C,0x00
+	CALL	PIO_WRITE
 
 	EI
 	RETI
@@ -75,6 +75,7 @@ ISR_TIMER_0:
 
 ; Driver Includes
 ; ------------------------------------------------------------------------------
+	include	"PIO.ASM"
 	include	"ISR.ASM"
 	include	"CTC.ASM"
 	include	"MEM.ASM"
