@@ -27,12 +27,11 @@ ISR_INIT:
 ; Title:      Install a service routine in the vector table
 ; Name:       ISR_INSTALL
 ;
-; Entry:      L = Vector 0 - 127, BC = Address to ISR
+; Entry:      L = Vector 0 - 127 (16-bit aligned), BC = Address to ISR
 ; Exit:       [No value]
 ; Registers:  A,BC,HL
 ; ------------------------------------------------------------------------------
 ISR_INSTALL:
-	SLA	L			; Multiply by two
 	LD	A,I
 	LD	H,A
 	LD	(HL),C

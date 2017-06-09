@@ -52,6 +52,17 @@ CTC_DEFAULT_CONF	EQU	0x20	; Prescaler = 1 (256)
 ; Registers:  A,BC,HL 
 ; ------------------------------------------------------------------------------
 CTC_INIT:
+	LD	C,0x00			; Initiate timer 0
+	CALL	CTC_CFG
+	LD	C,0x01			; Initiate timer 1
+	CALL	CTC_CFG
+	LD	C,0x02			; Initiate timer 2
+	CALL	CTC_CFG
+	LD	C,0x03			; Initiate timer 3
+	CALL	CTC_CFG
+	RET
+
+CTC_CFG:
 	LD	B,0x00			; Clear B
 	SLA	C			; Multiply timer index by two
 	LD	HL,CTC_TBL		; Load timer table start to HL

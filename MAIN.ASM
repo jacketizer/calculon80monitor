@@ -29,21 +29,27 @@ MAIN:
 	CALL	ISR_INIT		; Set interrupt mode and register
 	CALL	MEM_ROM_OUT		; Switch out ROM
 
-	LD	C,0x00			; Initiate timer 0
-	CALL	CTC_INIT
-	LD	C,0x01			; Initiate timer 1
-	CALL	CTC_INIT
-	LD	C,0x02			; Initiate timer 2
-	CALL	CTC_INIT
-	LD	C,0x03			; Initiate timer 3
+	LD	C,0x00			; Initiate timer driver
 	CALL	CTC_INIT
 
 	LD	L,0x00			; Install ISR Timer 0
 	LD	BC,ISR_TIMER_0
 	CALL	ISR_INSTALL
 
+	LD	L,0x0C			; Install ISR COM 0
+	LD	BC,ISR_COMRD_0
+	CALL	ISR_INSTALL
+
+	CALL	SIO_INIT
+	LD	C,0x00
+	CALL	SIO_CFG			; Channel 0
+
 	EI				; Enable Interrupts
 
+JACK:	XOR	A
+	JP	JACK
+
+	HALT
 	; Start Timer 0
 	LD	C,0x00			; Timer 0
 	LD	D,0xFF			; Timer constant
@@ -58,13 +64,23 @@ MAIN:
 ISR_TIMER_0:
 	DI
 
-	LD	A,D
-	CPL
-	LD	D,A
-
+	LD	C,0x00
+	CALL	SIO_READ
 	LD	B,A
 	LD	C,0x00
-	CALL	PIO_WRITE
+	CALL	SIO_WRITE
+
+	EI
+	RETI
+
+ISR_COMRD_0:
+	DI
+
+	LD	C,0x00
+	CALL	SIO_READ
+	LD	B,A
+	LD	C,0x00
+	CALL	SIO_WRITE
 
 	EI
 	RETI
@@ -79,6 +95,7 @@ ISR_TIMER_0:
 	include	"ISR.ASM"
 	include	"CTC.ASM"
 	include	"MEM.ASM"
+	include	"SIO.ASM"
 
 	DS	0xF000-$-ROM_MAIN	; Fill up the entire 2732 EPROM
 	END

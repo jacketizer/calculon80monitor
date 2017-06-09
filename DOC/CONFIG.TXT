@@ -1,0 +1,29 @@
+Available Attributes
+--------------------
+
+The following attributes should be available in the CONFIG.TXT file:
+
+  * DRV_MEM (MEM)
+  * DRV_ISR (ISR)
+  * DRV_SIO (COM)
+  * DRV_PIO (PIO)
+  * DRV_CTC (GPT)
+
+  * DEV_TTY (COM:0)
+  * DEV_STM (GPT:0)
+
+  * TTY_BUFFER_SIZE
+
+Example
+-------
+
+DRV_MEM=MEM.SYS
+DRV_ISR=ISR.SYS
+DRV_SIO=SIO_Z80SIO.SYS
+DRV_PIO=PIO_Z80PIO.SYS
+DRV_GPT=GPT_Z80CTC.SYS
+
+DEV_TTY=SIO:0
+DEV_STM=GPT:0
+
+TTY_BUFFER_SIZE=512
