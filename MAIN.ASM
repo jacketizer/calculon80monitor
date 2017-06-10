@@ -7,7 +7,6 @@
 
 ; RAM Layout
 ; ------------------------------------------------------------------------------
-MAIN_SIZE	EQU	0x0F00		; Size of Main Program
 STACK		EQU	0xFFFF		; Start of stack
 
 ; ROM Layout
@@ -26,30 +25,27 @@ MAIN:
 ; Init Stage 1
 ; ..............................................................................
 	LD	SP,STACK		; Set stack pointer
-	CALL	ISR_INIT		; Set interrupt mode and register
 	CALL	MEM_ROM_OUT		; Switch out ROM
 
-	LD	C,0x00			; Initiate timer driver
-	CALL	CTC_INIT
+	CALL	ISR_INIT		; Set interrupt mode and register
+	CALL	CTC_INIT		; Initiate CTC driver
+	CALL	COM_INIT		; Initiate COM driver
 
-	LD	L,0x00			; Install ISR Timer 0
+	LD	L,0x00			; Install ISR CTC:0
 	LD	BC,ISR_TIMER_0
 	CALL	ISR_INSTALL
 
-	LD	L,0x0C			; Install ISR COM 0
+	LD	L,0x0C			; Install ISR COM:0 Read
 	LD	BC,ISR_COMRD_0
 	CALL	ISR_INSTALL
 
-	CALL	COM_INIT
-	LD	C,0x00
-	CALL	COM_CFG			; Channel 0
+	LD	C,0x00			; Configure COM:0
+	CALL	COM_CFG
 
 	EI				; Enable Interrupts
 
-JACK:	XOR	A
-	JP	JACK
-
 	HALT
+
 	; Start Timer 0
 	LD	C,0x00			; Timer 0
 	LD	D,0xFF			; Timer constant
@@ -57,18 +53,11 @@ JACK:	XOR	A
 	LD	C,0x00			; Timer 0
 	CALL	CTC_ENABLE_INT		; Enable interrupts
 
-	LD	D,0xFF
 	HALT				; Wait for interrupts
 
 
 ISR_TIMER_0:
 	DI
-
-	LD	C,0x00
-	CALL	COM_READ
-	LD	B,A
-	LD	C,0x00
-	CALL	COM_WRITE
 
 	EI
 	RETI
@@ -97,5 +86,4 @@ ISR_COMRD_0:
 	include	"MEM.ASM"
 	include	"COM.ASM"
 
-	DS	0xF000-$-ROM_MAIN	; Fill up the entire 2732 EPROM
 	END
