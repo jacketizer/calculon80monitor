@@ -1,14 +1,14 @@
 ; ******************************************************************************
-; SIO DRIVER
+; COM DRIVER
 ; ******************************************************************************
-; Driver:  Low level driver for the SIO
+; Driver:  Low level COM driver for the Z80 SIO
 ; ------------------------------------------------------------------------------
 
 ; Addresses
 ; ------------------------------------------------------------------------------
-SIO_BASE_ADDR			EQU	0x10
-SIO_CTRL_A			EQU	0x11
-SIO_CTRL_B			EQU	0x13
+COM_BASE_ADDR			EQU	0x10
+COM_CTRL_A			EQU	0x11
+COM_CTRL_B			EQU	0x13
 
 ; Variables
 ; ------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ SIO_CTRL_B			EQU	0x13
 ; Macros
 ; ------------------------------------------------------------------------------
 FIX_IDX	MACRO
-	LD	A,SIO_BASE_ADDR		; Load base addr
+	LD	A,COM_BASE_ADDR		; Load base addr
 	RLC	C			; Multiply index by two
 	ADD	A,C			; Merge
 	LD	C,A
@@ -50,18 +50,18 @@ ERR_RST	MACRO
 ; ------------------------------------------------------------------------------
 ; Title:      Initiate the driver
 ; Desc:       Resets all channels and sets the interrupt vector.
-; Name:       SIO_INIT
+; Name:       COM_INIT
 ;
 ; Entry:      [No arguments]
 ; Exit:       [No value]
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
-SIO_INIT:
-	LD	C,SIO_CTRL_A
+COM_INIT:
+	LD	C,COM_CTRL_A
 	ERR_RST
 	CH_RST
 
-	LD	C,SIO_CTRL_B
+	LD	C,COM_CTRL_B
 	ERR_RST
 	CH_RST
 
@@ -73,13 +73,13 @@ SIO_INIT:
 
 ; ------------------------------------------------------------------------------
 ; Title:      Configure a channel for communication
-; Name:       SIO_CFG
+; Name:       COM_CFG
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       [No value]
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
-SIO_CFG:
+COM_CFG:
 	FIX_IDX
 	INC	C			; Set to control address
 
@@ -106,8 +106,8 @@ SIO_CFG:
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; Title:      Check status
-; Name:       SIO_STATUS
+; Title:      Check status of a COM channel
+; Name:       COM_STATUS
 ; Desc:       Retrieves the status and returns an appropriate value.
 ;
 ; Entry:      C = Channel Index (0..1)
@@ -119,7 +119,7 @@ SIO_CFG:
 ;               0: All OK
 ; Registers:  A,B,C 
 ; ------------------------------------------------------------------------------
-SIO_STATUS:
+COM_STATUS:
 	FIX_IDX
 	INC	C			; Set to control address
 
@@ -128,38 +128,38 @@ SIO_STATUS:
 	IN	A,(C)
 	LD	B,0x08			; If reg is 8 or more: error!
 	CP	B
-	JP	M,SIO_ST_ERR		; Error
+	JP	M,COM_ST_ERR		; Error
 
 	IN	A,(C)
 	BIT	5,A
-	JP	Z,SIO_ST_NOCTS		; Not clear to send
+	JP	Z,COM_ST_NOCTS		; Not clear to send
 	BIT	0,A
-	JP	NZ,SIO_ST_CHAR		; Character received
+	JP	NZ,COM_ST_CHAR		; Character received
 	
 	XOR	A			; All OK
 	RET
 
-SIO_ST_ERR:
+COM_ST_ERR:
 	LD	A,0x04
 	RET
-SIO_ST_NOCTS:
+COM_ST_NOCTS:
 	LD	A,0x02
 	RET
-SIO_ST_CHAR:
+COM_ST_CHAR:
 	LD	A,0x01
 	RET
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; Title:      Write a character to the SIO (blocking)
-; Name:       SIO_WRITE
+; Title:      Write a character to the COM channel (blocking)
+; Name:       COM_WRITE
 ;
 ; Entry:      C = Channel Index (0..1), B = Character
 ; Exit:       [No value]
 ; Registers:  A,C 
 ; TODO: Add timeout
 ; ------------------------------------------------------------------------------
-SIO_WRITE:
+COM_WRITE:
 	FIX_IDX
 
 	LD	A,B
@@ -176,7 +176,7 @@ ISSENT: LD	A,0x01
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; Title:      Read a character from the SIO (blocking)
+; Title:      Read a character from the COM channel (blocking)
 ; Name:       SIO_READ
 ;
 ; Entry:      C = Channel Index (0..1)
@@ -184,28 +184,28 @@ ISSENT: LD	A,0x01
 ; Registers:  A,C 
 ; TODO: Add timeout
 ; ------------------------------------------------------------------------------
-SIO_READ:
+COM_READ:
 	FIX_IDX
 	INC	C			; Set to control address
 
-SIO_READ_2:
+COM_READ_2:
 	LD	A,0x01
 	OUT	(C),A
 	IN	A,(C)
 	BIT	4,A
-	JR	NZ,SIO_READ_ERR	; Parity error
+	JR	NZ,COM_READ_ERR	; Parity error
 	BIT	6,A
-	JR	NZ,SIO_READ_ERR	; Framing error
+	JR	NZ,COM_READ_ERR	; Framing error
 	; Character available check
 	IN	A,(C)
 	BIT	0,A
-	JR	Z,SIO_READ_2
+	JR	Z,COM_READ_2
 
 	DEC	C			; Set to data address
 	IN	A,(C)
 	RET
 
-SIO_READ_ERR:
+COM_READ_ERR:
 	RET
 ; ------------------------------------------------------------------------------
 

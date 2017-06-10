@@ -40,9 +40,9 @@ MAIN:
 	LD	BC,ISR_COMRD_0
 	CALL	ISR_INSTALL
 
-	CALL	SIO_INIT
+	CALL	COM_INIT
 	LD	C,0x00
-	CALL	SIO_CFG			; Channel 0
+	CALL	COM_CFG			; Channel 0
 
 	EI				; Enable Interrupts
 
@@ -65,10 +65,10 @@ ISR_TIMER_0:
 	DI
 
 	LD	C,0x00
-	CALL	SIO_READ
+	CALL	COM_READ
 	LD	B,A
 	LD	C,0x00
-	CALL	SIO_WRITE
+	CALL	COM_WRITE
 
 	EI
 	RETI
@@ -77,10 +77,10 @@ ISR_COMRD_0:
 	DI
 
 	LD	C,0x00
-	CALL	SIO_READ
+	CALL	COM_READ
 	LD	B,A
 	LD	C,0x00
-	CALL	SIO_WRITE
+	CALL	COM_WRITE
 
 	EI
 	RETI
@@ -95,7 +95,7 @@ ISR_COMRD_0:
 	include	"ISR.ASM"
 	include	"CTC.ASM"
 	include	"MEM.ASM"
-	include	"SIO.ASM"
+	include	"COM.ASM"
 
 	DS	0xF000-$-ROM_MAIN	; Fill up the entire 2732 EPROM
 	END
