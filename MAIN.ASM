@@ -43,6 +43,8 @@ MAIN:
 	CALL	COM_CFG
 
 	EI				; Enable Interrupts
+JACK:	XOR	A
+	JP	JACK
 
 	HALT
 

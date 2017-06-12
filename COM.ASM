@@ -100,7 +100,7 @@ COM_CFG:
 
 	; Rx int enable
 	WR_REG	1,0x18			; WR1: Rx interrupts enabled
-	; If channel is B (0), then OR 0x18 with 0x04 (Vector affects)
+	; TODO: If channel is B (0), then OR 0x18 with 0x04 (Vector affects)
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -112,41 +112,49 @@ COM_CFG:
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       A = Status Code
-;               Status Codes:
-;               4: Error
-;               2: No CTS
-;               1: Rx Char Available
-;               0: All OK
+;             Bits:
+;               7: Error
+;               6: Rx Char Available
+;               5: Reserved
+;               4: Reserved
+;               3: Reserved
+;               2: Reserved
+;               1: CTS
+;               0: DCD
 ; Registers:  A,B,C 
 ; ------------------------------------------------------------------------------
 COM_STATUS:
 	FIX_IDX
 	INC	C			; Set to control address
+	LD	D,0x00			; Reset result
 
-	LD	A,0x01			; Read Reg 1
-	OUT	(C),A
-	IN	A,(C)
+	RD_REG	1
 	LD	B,0x08			; If reg is 8 or more: error!
 	CP	B
-	JP	M,COM_ST_ERR		; Error
+	CALL	M,COM_ST_ERR		; Error
 
-	IN	A,(C)
+	RD_REG	0
 	BIT	5,A
-	JP	Z,COM_ST_NOCTS		; Not clear to send
+	CALL	NZ,COM_ST_CTS		; Clear To Send
+	BIT	3,A
+	CALL	NZ,COM_ST_DCD		; Data Carrier Detect
 	BIT	0,A
-	JP	NZ,COM_ST_CHAR		; Character received
+	CALL	NZ,COM_ST_CHAR		; Character received
 	
-	XOR	A			; All OK
+	LD	A,D			; Copy result to A
 	RET
 
 COM_ST_ERR:
-	LD	A,0x04
+	SET	7,D
 	RET
-COM_ST_NOCTS:
-	LD	A,0x02
+COM_ST_CTS:
+	SET	1,D
+	RET
+COM_ST_DCD:
+	SET	0,D
 	RET
 COM_ST_CHAR:
-	LD	A,0x01
+	SET	6,D
 	RET
 ; ------------------------------------------------------------------------------
 
@@ -154,10 +162,10 @@ COM_ST_CHAR:
 ; Title:      Write a character to the COM channel (blocking)
 ; Name:       COM_WRITE
 ;
-; Entry:      C = Channel Index (0..1), B = Character
+; Entry:      C = Channel Index (0..1), B = Character to send
 ; Exit:       [No value]
 ; Registers:  A,C 
-; TODO: Add timeout
+; TODO: Add timeout and error return code
 ; ------------------------------------------------------------------------------
 COM_WRITE:
 	FIX_IDX
@@ -166,9 +174,8 @@ COM_WRITE:
 	OUT	(C),A
 	INC	C			; Set to control address
 
-ISSENT: LD	A,0x01
-	OUT	(C),A
-	IN	A,(C)
+ISSENT:
+	RD_REG	1
 	BIT	0,A
 	JR	Z,ISSENT
 
@@ -182,28 +189,25 @@ ISSENT: LD	A,0x01
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       A = Character
 ; Registers:  A,C 
-; TODO: Add timeout
+; TODO: Add timeout and error return code
 ; ------------------------------------------------------------------------------
 COM_READ:
 	FIX_IDX
 	INC	C			; Set to control address
 
 COM_READ_2:
-	LD	A,0x01
-	OUT	(C),A
-	IN	A,(C)
+	RD_REG	1
 	BIT	4,A
-	JR	NZ,COM_READ_ERR	; Parity error
+	JR	NZ,COM_READ_ERR		; Parity error
 	BIT	6,A
-	JR	NZ,COM_READ_ERR	; Framing error
-	; Character available check
-	IN	A,(C)
+	JR	NZ,COM_READ_ERR		; Framing error
+
+	RD_REG	0			; Check if a character is available
 	BIT	0,A
 	JR	Z,COM_READ_2
 
 	DEC	C			; Set to data address
-	IN	A,(C)
-	RET
+	IN	A,(C)			; Read character
 
 COM_READ_ERR:
 	RET
