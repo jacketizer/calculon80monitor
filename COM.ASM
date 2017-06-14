@@ -78,6 +78,7 @@ COM_INIT:
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       [No value]
 ; Registers:  A,C 
+; TODO: If channel is B (0), then OR 0x18 with 0x04 (Vector affects)
 ; ------------------------------------------------------------------------------
 COM_CFG:
 	FIX_IDX
@@ -100,7 +101,6 @@ COM_CFG:
 
 	; Rx int enable
 	WR_REG	1,0x18			; WR1: Rx interrupts enabled
-	; TODO: If channel is B (0), then OR 0x18 with 0x04 (Vector affects)
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -129,34 +129,25 @@ COM_STATUS:
 	LD	D,0x00			; Reset result
 
 	RD_REG	1
-	LD	B,0x08			; If reg is 8 or more: error!
-	CP	B
-	CALL	M,COM_ST_ERR		; Error
-
+	AND	0x70
+	JP	Z,COM_ST_1
+	SET	7,D			; Error
+COM_ST_1:
 	RD_REG	0
-	BIT	5,A
-	CALL	NZ,COM_ST_CTS		; Clear To Send
-	BIT	3,A
-	CALL	NZ,COM_ST_DCD		; Data Carrier Detect
-	BIT	0,A
-	CALL	NZ,COM_ST_CHAR		; Character received
-	
+	BIT	5,A			; Clear To Send
+	JP	Z,COM_ST_2
+	SET	1,D
+COM_ST_2:
+	BIT	3,A			; Data Carrier Detect
+	JP	Z,COM_ST_3
+	SET	0,D
+COM_ST_3:
+	BIT	0,A			; Character Received
+	JP	Z,COM_ST_4
+	SET	6,D
+COM_ST_4:
 	LD	A,D			; Copy result to A
 	RET
-
-COM_ST_ERR:
-	SET	7,D
-	RET
-COM_ST_CTS:
-	SET	1,D
-	RET
-COM_ST_DCD:
-	SET	0,D
-	RET
-COM_ST_CHAR:
-	SET	6,D
-	RET
-; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
 ; Title:      Write a character to the COM channel (blocking)
