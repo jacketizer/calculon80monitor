@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; COM DRIVER
 ; ******************************************************************************
-; Driver:  Low level COM driver for the Z80 SIO
+; Driver:  Low level character device driver for the Z80 SIO
 ; ------------------------------------------------------------------------------
 
 ; Addresses
@@ -66,7 +66,7 @@ COM_INIT:
 	CH_RST
 
 	WR_REG	2,0x00			; WR4: Interrupt Vector
-	WR_REG	1,0x04			; WR1: Status Affects Vector
+;	WR_REG	1,0x04			; WR1: Status Affects Vector
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -99,8 +99,8 @@ COM_CFG:
 	; Rx enable, 8 bits/char
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
 
-	; Rx int enable
-	WR_REG	1,0x18			; WR1: Rx interrupts enabled
+	; Rx and Tx int enable
+	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -115,13 +115,13 @@ COM_CFG:
 ;             Bits:
 ;               7: Error
 ;               6: Rx Char Available
-;               5: Reserved
+;               5: Tx Buffer Empty
 ;               4: Reserved
 ;               3: Reserved
 ;               2: Reserved
 ;               1: CTS
 ;               0: DCD
-; Registers:  A,B,C 
+; Registers:  A,B,C,D
 ; ------------------------------------------------------------------------------
 COM_STATUS:
 	FIX_IDX
@@ -146,61 +146,39 @@ COM_ST_3:
 	JP	Z,COM_ST_4
 	SET	6,D
 COM_ST_4:
+	BIT	2,A			; Character Received
+	JP	Z,COM_ST_5
+	SET	5,D
+COM_ST_5:
 	LD	A,D			; Copy result to A
 	RET
 
 ; ------------------------------------------------------------------------------
-; Title:      Write a character to the COM channel (blocking)
+; Title:      Write a character to the COM channel
 ; Name:       COM_WRITE
 ;
 ; Entry:      C = Channel Index (0..1), B = Character to send
 ; Exit:       [No value]
-; Registers:  A,C 
-; TODO: Add timeout and error return code
+; Registers:  A,B,C 
 ; ------------------------------------------------------------------------------
 COM_WRITE:
 	FIX_IDX
-
 	LD	A,B
 	OUT	(C),A
-	INC	C			; Set to control address
-
-ISSENT:
-	RD_REG	1
-	BIT	0,A
-	JR	Z,ISSENT
-
 	RET
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; Title:      Read a character from the COM channel (blocking)
+; Title:      Read a character from the COM channel
 ; Name:       SIO_READ
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       A = Character
 ; Registers:  A,C 
-; TODO: Add timeout and error return code
 ; ------------------------------------------------------------------------------
 COM_READ:
 	FIX_IDX
-	INC	C			; Set to control address
-
-COM_READ_2:
-	RD_REG	1
-	BIT	4,A
-	JR	NZ,COM_READ_ERR		; Parity error
-	BIT	6,A
-	JR	NZ,COM_READ_ERR		; Framing error
-
-	RD_REG	0			; Check if a character is available
-	BIT	0,A
-	JR	Z,COM_READ_2
-
-	DEC	C			; Set to data address
 	IN	A,(C)			; Read character
-
-COM_READ_ERR:
 	RET
 ; ------------------------------------------------------------------------------
 

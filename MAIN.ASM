@@ -32,17 +32,18 @@ MAIN:
 	CALL	COM_INIT		; Initiate COM driver
 
 	LD	L,0x00			; Install ISR CTC:0
-	LD	BC,ISR_TIMER_0
+	LD	BC,ISR_COM_0
 	CALL	ISR_INSTALL
 
-	LD	L,0x0C			; Install ISR COM:0 Read
-	LD	BC,ISR_COMRD_0
+	LD	L,0x0C			; Install ISR COM:0
+	LD	BC,ISR_COM_0
 	CALL	ISR_INSTALL
 
 	LD	C,0x00			; Configure COM:0
 	CALL	COM_CFG
 
 	EI				; Enable Interrupts
+
 JACK:	XOR	A
 	JP	JACK
 
@@ -64,14 +65,10 @@ ISR_TIMER_0:
 	EI
 	RETI
 
-ISR_COMRD_0:
+ISR_COM_0:
 	DI
 
-	LD	C,0x00
-	CALL	COM_READ
-	LD	B,A
-	LD	C,0x00
-	CALL	COM_WRITE
+	CALL	CONS_PROCESS
 
 	EI
 	RETI
@@ -87,5 +84,6 @@ ISR_COMRD_0:
 	include	"CTC.ASM"
 	include	"MEM.ASM"
 	include	"COM.ASM"
+	include "CONSOLE.ASM"
 
 	END
