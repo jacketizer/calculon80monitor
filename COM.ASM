@@ -84,22 +84,12 @@ COM_CFG:
 	FIX_IDX
 	INC	C			; Set to control address
 
-	; Error reset
-	ERR_RST
+	ERR_RST				; Reset errors
+	CH_RST				; Reset channel
 
-	; Reset channel
-	CH_RST
-
-	; Parity, clock and stop bits
 	WR_REG	4,0x8F			; WR4: x32 clock, 2 stop bits, even parity
-
-	; Tx enable, 8 bits/char, RTS
 	WR_REG	5,0x6A			; WR5: 8-bit, Tx enabled, RTS
-
-	; Rx enable, 8 bits/char
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
-
-	; Rx and Tx int enable
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
 	RET

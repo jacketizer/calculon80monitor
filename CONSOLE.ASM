@@ -1,20 +1,29 @@
-	ALIGN	256			; Buffer needs to be page aligned
+		ALIGN	256			; Buffer needs to be page aligned
 
-CONS_BUF	DEFM	"ST JOHANSSON 12345678 JACK ENGQVIXXXXX"
-CONS_BUF_HEAD	DEFB	22
-CONS_BUF_TAIL	DEFB	21
+CONS_BUF	DEFS	0x20
+CONS_BUF_HEAD	DEFB	0x00
+CONS_BUF_TAIL	DEFB	0x00
 CONS_BUF_LEN	EQU	0x1F		; Needs to be a power of two - 1
 CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
-ITOADDR MACRO				; Index in C
+ITOADDR MACRO	REG
 	LD	HL,CONS_BUF		; 3.5
-	LD	L,C			; 2
+	LD	L,REG			; 2
 	ENDM
 
-ISEMPTY MACRO
+ISEMPTY	MACRO
 	LD	A,(CONS_BUF_HEAD)
 	LD	C,A
 	LD	A,(CONS_BUF_TAIL)
+	CP	C
+	ENDM
+
+ISFULL	MACRO
+	LD	A,(CONS_BUF_TAIL)
+	INC	A
+	AND	CONS_BUF_LEN		; Modulus Length
+	LD	C,A
+	LD	A,(CONS_BUF_HEAD)
 	CP	C
 	ENDM
 
@@ -27,15 +36,24 @@ BUF_ADV	MACRO	POINTER
 	ENDM
 
 CONS_SEND_JACK:
-	LD	HL,CONS_BUF_HEAD
-	LD	(HL),22	
-	LD	HL,CONS_BUF_TAIL
-	LD	(HL),21
+	LD	B,"J"
+	CALL	CONS_SEND_CHAR
+	LD	B,"A"
+	CALL	CONS_SEND_CHAR
+	LD	B,"C"
+	CALL	CONS_SEND_CHAR
+	LD	B,"K"
+	CALL	CONS_SEND_CHAR
+
 	CALL	CONS_SEND_NEXT
 	RET
 
 CONS_SEND_CHAR:
-	LD	(CONS_BUF_TAIL),A
+	ISFULL
+	RET	Z			; If full, return
+	LD	A,(CONS_BUF_TAIL)
+	ITOADDR	A
+	LD	(HL),B
 	BUF_ADV	CONS_BUF_TAIL
 	RET
 
@@ -44,15 +62,12 @@ CONS_SEND_NEXT:
 	ISEMPTY
 	RET	Z			; If empty, return
 	
-	ITOADDR
+	ITOADDR	C
 	LD	B,(HL)
 	LD	C,CONS_COM_CH
 	CALL	COM_WRITE
 
 	BUF_ADV	CONS_BUF_HEAD
-
-	; The SIO has a two character buffer, send again
-	CALL	CONS_SEND_NEXT
 	RET
 
 ;---------------------------------------------
@@ -63,18 +78,16 @@ CONS_PROCESS:
 	JP	NZ,ISR_COM_READ
 	BIT	5,A
 	JP	NZ,ISR_COM_TXEMPTY
-	JP	ISR_COM_END
+	RET
 
 ISR_COM_READ:
 	LD	C,CONS_COM_CH
 	CALL	COM_READ
 	CALL	CONS_SEND_JACK
 ; TODO: Save character and check if rx buffer is empty...
-	JP	ISR_COM_END
+	RET
 
 ISR_COM_TXEMPTY:
 	CALL	CONS_SEND_NEXT
-
-ISR_COM_END:
 	RET
 ;---------------------------------------------
