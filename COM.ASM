@@ -12,6 +12,7 @@ COM_CTRL_B			EQU	0x13
 
 ; Variables
 ; ------------------------------------------------------------------------------
+TX_OFF				DEFB	0x00
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -65,8 +66,8 @@ COM_INIT:
 	ERR_RST
 	CH_RST
 
-	WR_REG	2,0x00			; WR4: Interrupt Vector
-;	WR_REG	1,0x04			; WR1: Status Affects Vector
+	WR_REG	2,0x00			; WR2: Interrupt Vector
+	WR_REG	1,0x00			; WR1: Status Affect Vector: off
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -79,6 +80,7 @@ COM_INIT:
 ; Exit:       [No value]
 ; Registers:  A,C 
 ; TODO: If channel is B (0), then OR 0x18 with 0x04 (Vector affects)
+; TODO: DTR?
 ; ------------------------------------------------------------------------------
 COM_CFG:
 	FIX_IDX
@@ -88,12 +90,45 @@ COM_CFG:
 	CH_RST				; Reset channel
 
 	WR_REG	4,0x8F			; WR4: x32 clock, 2 stop bits, even parity
-	WR_REG	5,0x6A			; WR5: 8-bit, Tx enabled, RTS
+	WR_REG	5,0xEA			; WR5: 8-bit, Tx enabled, RTS, DTR
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
+	LD	A,0x00
+	LD	(TX_OFF),A
+
 	RET
 ; ------------------------------------------------------------------------------
+
+COM_TX_OFF:
+	FIX_IDX
+	INC	C			; Set to control address
+
+	WR_REG	5,0xE0			; WR5: 8-bit, Tx disabled, DTR
+	WR_REG	1,0x18			; WR1: Tx interrupts disabled
+
+	LD	A,0x11
+	LD	(TX_OFF),A
+
+	RET
+
+COM_TX_ON:
+	FIX_IDX
+	INC	C			; Set to control address
+
+	WR_REG	5,0xEA			; WR5: 8-bit, Tx enabled, RTS
+	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
+
+	XOR 	A
+	LD	(TX_OFF),A
+
+	RET
+
+COM_IS_TX_OFF:
+	LD	A,(TX_OFF)
+	CP	0x00
+	CALL	NZ,COM_TX_ON
+	RET
 
 ; ------------------------------------------------------------------------------
 ; Title:      Check status of a COM channel

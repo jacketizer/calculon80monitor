@@ -44,7 +44,9 @@ MAIN:
 
 	EI				; Enable Interrupts
 
-JACK:	XOR	A
+JACK:
+	CALL	CONS_READ
+	CALL	SEND_JACK
 	JP	JACK
 
 	HALT
@@ -58,7 +60,7 @@ JACK:	XOR	A
 
 	HALT				; Wait for interrupts
 
-CONS_SEND_JACK:
+SEND_JACK:
 	LD	B,"J"
 	CALL	CONS_WRITE_CHAR
 	LD	B,"A"
@@ -68,19 +70,19 @@ CONS_SEND_JACK:
 	LD	B,"K"
 	CALL	CONS_WRITE_CHAR
 
+	DI
 	CALL	CONS_PROCESS_SEND
+	EI
 	RET
 
 
 
 ISR_TIMER_0:
-	DI
 
 	EI
 	RETI
 
 ISR_COM_0:
-	DI
 	EX	AF,AF'
 	EXX
 

@@ -13,6 +13,8 @@
 CONS_OUTBUF	DEFS	0x20
 		ALIGN	256		; Buffer needs to be page aligned
 CONS_INBUF	DEFS	0x20
+CONS_JACK:	DEFB	0x00
+		DEFB	0x00
 
 ; Variables
 ; ------------------------------------------------------------------------------
@@ -100,8 +102,12 @@ CONS_WRITE_CHAR:
 ; ------------------------------------------------------------------------------
 CONS_PROCESS_SEND:
 	ISEMPTY	OUT
-	RET	Z			; If empty, return
+	JP	Z,STOP_TX			; If empty, return
+
+	LD	C,CONS_COM_CH
+	CALL	COM_IS_TX_OFF
 	
+	ISEMPTY	OUT				; Just to fill C and HL, fix this
 	ITOADDR	OUT,C
 	LD	B,(HL)
 	LD	C,CONS_COM_CH
@@ -109,7 +115,23 @@ CONS_PROCESS_SEND:
 
 	BUF_ADV	CONS_BUF_HEAD
 	RET
+
+STOP_TX:
+	LD	C,CONS_COM_CH
+	CALL	COM_TX_OFF
+	RET
 ; ------------------------------------------------------------------------------
+
+CONS_READ:
+
+	LD	A,(CONS_JACK)
+	CP	0x00
+	JP	Z,CONS_READ
+
+	XOR	A
+	LD	(CONS_JACK),A
+
+	RET
 
 ; ------------------------------------------------------------------------------
 ; Title:      Process pending send and receive requests 
@@ -126,14 +148,20 @@ CONS_PROCESS:
 	LD	C,0
 	CALL	COM_STATUS
 	BIT	6,A
-	JP	NZ,ISR_COM_READ
+	CALL	NZ,ISR_COM_READ
+
+	LD	C,0
+	CALL	COM_STATUS
 	BIT	5,A
-	JP	NZ,ISR_COM_TXEMPTY
+	CALL	NZ,ISR_COM_TXEMPTY
+
 	RET
 
 ISR_COM_READ:
 	LD	C,CONS_COM_CH
 	CALL	COM_READ
+	LD	A,0x89
+	LD	(CONS_JACK),A
 ; TODO: Save character and check if rx buffer is empty...
 ; Save character in input buffer
 ; Advance pointer
