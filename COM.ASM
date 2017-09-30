@@ -116,7 +116,7 @@ COM_TX_OFF:
 	FIX_IDX
 	INC	C			; Set to control address
 
-	WR_REG	5,0xE0			; WR5: 8-bit, Tx disabled, DTR
+	WR_REG	5,0xE2			; WR5: 8-bit, Tx disabled, RTS, DTR
 	WR_REG	1,0x18			; WR1: Tx interrupts disabled
 
 	LD	A,0xFF
