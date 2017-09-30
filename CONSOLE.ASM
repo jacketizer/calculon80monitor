@@ -105,7 +105,7 @@ CONS_PROCESS_SEND:
 	JP	Z,STOP_TX			; If empty, return
 
 	LD	C,CONS_COM_CH
-	CALL	COM_IS_TX_OFF
+	CALL	COM_TX_ON
 	
 	ISEMPTY	OUT				; Just to fill C and HL, fix this
 	ITOADDR	OUT,C

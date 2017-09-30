@@ -100,19 +100,44 @@ COM_CFG:
 	RET
 ; ------------------------------------------------------------------------------
 
+; ------------------------------------------------------------------------------
+; Title:      Disable transmission for a channel
+; Name:       COM_TX_OFF
+;
+; Entry:      C = Channel Index (0..1)
+; Exit:       [No value]
+; Registers:  A,C 
+; ------------------------------------------------------------------------------
 COM_TX_OFF:
+	LD	A,(TX_OFF)
+	CP	0x00
+	RET	NZ
+
 	FIX_IDX
 	INC	C			; Set to control address
 
 	WR_REG	5,0xE0			; WR5: 8-bit, Tx disabled, DTR
 	WR_REG	1,0x18			; WR1: Tx interrupts disabled
 
-	LD	A,0x11
+	LD	A,0xFF
 	LD	(TX_OFF),A
 
 	RET
+; ------------------------------------------------------------------------------
 
+; ------------------------------------------------------------------------------
+; Title:      Enable transmission for a channel
+; Name:       COM_TX_ON
+;
+; Entry:      C = Channel Index (0..1)
+; Exit:       [No value]
+; Registers:  A,C 
+; ------------------------------------------------------------------------------
 COM_TX_ON:
+	LD	A,(TX_OFF)
+	CP	0x00
+	RET	Z
+
 	FIX_IDX
 	INC	C			; Set to control address
 
@@ -123,12 +148,7 @@ COM_TX_ON:
 	LD	(TX_OFF),A
 
 	RET
-
-COM_IS_TX_OFF:
-	LD	A,(TX_OFF)
-	CP	0x00
-	CALL	NZ,COM_TX_ON
-	RET
+; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
 ; Title:      Check status of a COM channel
