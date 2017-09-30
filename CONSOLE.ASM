@@ -102,23 +102,18 @@ CONS_WRITE_CHAR:
 ; ------------------------------------------------------------------------------
 CONS_PROCESS_SEND:
 	ISEMPTY	OUT
-	JP	Z,STOP_TX			; If empty, return
-
 	LD	C,CONS_COM_CH
+	JP	Z,COM_TX_OFF
 	CALL	COM_TX_ON
 	
-	ISEMPTY	OUT				; Just to fill C and HL, fix this
+	LD	A,(CONS_BUF_HEAD)
+	LD	C,A
 	ITOADDR	OUT,C
 	LD	B,(HL)
 	LD	C,CONS_COM_CH
 	CALL	COM_WRITE
 
 	BUF_ADV	CONS_BUF_HEAD
-	RET
-
-STOP_TX:
-	LD	C,CONS_COM_CH
-	CALL	COM_TX_OFF
 	RET
 ; ------------------------------------------------------------------------------
 
