@@ -23,6 +23,7 @@ CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
 CONS_BUF_HEAD	DEFB	0x00
 CONS_BUF_TAIL	DEFB	0x00
+CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
 ; TODO: Pointers for input buffer...
 
 ; Macros
@@ -94,7 +95,7 @@ CONS_WRITE_CHAR:
 ; Title:      Send a character if buffer is not empty
 ; Desc:       Uses the COM driver to actually send a character from the output
 ;             buffer.
-; Name:       CON_PROCESS_SEND
+; Name:       CONS_PROCESS_SEND
 ;
 ; Entry:      [No arguments]
 ; Exit:       [No value]
@@ -114,6 +115,28 @@ CONS_PROCESS_SEND:
 	CALL	COM_WRITE
 
 	BUF_ADV	CONS_BUF_HEAD
+	RET
+; ------------------------------------------------------------------------------
+
+; ------------------------------------------------------------------------------
+; Title:      Read a character into the buffer
+; Desc:       Uses the COM driver to actually read a character into the input
+;             buffer.
+; Name:       CONS_PROCESS_RECEIVE
+;
+; Entry:      [No arguments]
+; Exit:       [No value]
+; Registers:  A,B,C,HL
+; ------------------------------------------------------------------------------
+CONS_PROCESS_RECEIVE:
+	LD	C,CONS_COM_CH
+	CALL	COM_READ
+	LD	A,0x89
+	LD	(CONS_JACK),A
+; TODO: Save character and check if rx buffer is empty...
+; Save character in input buffer
+; Advance pointer
+; Set rx flag to 1
 	RET
 ; ------------------------------------------------------------------------------
 
@@ -140,31 +163,17 @@ CONS_READ_CHAR:
 ; Registers:  A,B,C,D,HL
 ; ------------------------------------------------------------------------------
 CONS_PROCESS:
-	LD	C,0
-	CALL	COM_STATUS
-	BIT	6,A
-	CALL	NZ,ISR_COM_READ
-
-	LD	C,0
-	CALL	COM_STATUS
-	BIT	5,A
-	CALL	NZ,ISR_COM_TXEMPTY
-
-	RET
-
-ISR_COM_READ:
 	LD	C,CONS_COM_CH
-	CALL	COM_READ
-	LD	A,0x89
-	LD	(CONS_JACK),A
-; TODO: Save character and check if rx buffer is empty...
-; Save character in input buffer
-; Advance pointer
-; Set rx flag to 1
-	RET
+	CALL	COM_STATUS
+	LD	(CONS_COM_STATUS),A
 
-ISR_COM_TXEMPTY:
-	CALL	CONS_PROCESS_SEND
+	BIT	6,A
+	CALL	NZ,CONS_PROCESS_RECEIVE
+
+	LD	A,(CONS_COM_STATUS)
+	BIT	5,A
+	CALL	NZ,CONS_PROCESS_SEND
+
 	RET
 ; ------------------------------------------------------------------------------
 
