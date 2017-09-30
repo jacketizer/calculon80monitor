@@ -21,10 +21,11 @@ CONS_JACK:	DEFB	0x00
 CONS_BUF_LEN	EQU	0x1F		; Needs to be a power of two - 1
 CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
-CONS_BUF_HEAD	DEFB	0x00
-CONS_BUF_TAIL	DEFB	0x00
+CONS_OUT_HEAD	DEFB	0x00
+CONS_OUT_TAIL	DEFB	0x00
+CONS_IN_HEAD	DEFB	0x00
+CONS_IN_TAIL	DEFB	0x00
 CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
-; TODO: Pointers for input buffer...
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -39,24 +40,24 @@ ITOADDR MACRO	BUFFER,REG
 
 ISEMPTY	MACRO	BUFFER
 	IF	BUFFER==OUT
-	LD	A,(CONS_BUF_HEAD)
+	LD	A,(CONS_OUT_HEAD)
 	LD	C,A
-	LD	A,(CONS_BUF_TAIL)
+	LD	A,(CONS_OUT_TAIL)
 	ELSE
-	LD	A,(CONS_BUF_HEAD)
+	LD	A,(CONS_IN_HEAD)
 	LD	C,A
-	LD	A,(CONS_BUF_TAIL)
+	LD	A,(CONS_IN_TAIL)
 	ENDIF
 	CP	C
 	ENDM
 
 ISFULL	MACRO	BUFFER
 	IF	BUFFER==OUT
-	LD	A,(CONS_BUF_TAIL)
+	LD	A,(CONS_OUT_TAIL)
 	INC	A
 	AND	CONS_BUF_LEN		; Modulus Length
 	LD	C,A
-	LD	A,(CONS_BUF_HEAD)
+	LD	A,(CONS_OUT_HEAD)
 	ELSE
 	ENDIF
 	CP	C
@@ -84,10 +85,10 @@ BUF_ADV	MACRO	POINTER
 CONS_WRITE_CHAR:
 	ISFULL	OUT
 	RET	Z			; If full, return
-	LD	A,(CONS_BUF_TAIL)
+	LD	A,(CONS_OUT_TAIL)
 	ITOADDR	OUT,A
 	LD	(HL),B
-	BUF_ADV	CONS_BUF_TAIL
+	BUF_ADV	CONS_OUT_TAIL
 	RET
 ; ------------------------------------------------------------------------------
 
@@ -107,14 +108,14 @@ CONS_PROCESS_SEND:
 	JP	Z,COM_TX_OFF
 	CALL	COM_TX_ON
 	
-	LD	A,(CONS_BUF_HEAD)
+	LD	A,(CONS_OUT_HEAD)
 	LD	C,A
 	ITOADDR	OUT,C
 	LD	B,(HL)
 	LD	C,CONS_COM_CH
 	CALL	COM_WRITE
 
-	BUF_ADV	CONS_BUF_HEAD
+	BUF_ADV	CONS_OUT_HEAD
 	RET
 ; ------------------------------------------------------------------------------
 
