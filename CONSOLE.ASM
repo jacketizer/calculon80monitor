@@ -13,8 +13,6 @@
 CONS_OUTBUF	DEFS	0x20
 		ALIGN	256		; Buffer needs to be page aligned
 CONS_INBUF	DEFS	0x20
-CONS_JACK:	DEFB	0x00
-		DEFB	0x00
 
 ; Variables
 ; ------------------------------------------------------------------------------
@@ -26,6 +24,7 @@ CONS_OUT_TAIL	DEFB	0x00
 CONS_IN_HEAD	DEFB	0x00
 CONS_IN_TAIL	DEFB	0x00
 CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
+CONS_NEW_CHAR	DEFB	0x00
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -59,6 +58,11 @@ ISFULL	MACRO	BUFFER
 	LD	C,A
 	LD	A,(CONS_OUT_HEAD)
 	ELSE
+	LD	A,(CONS_IN_TAIL)
+	INC	A
+	AND	CONS_BUF_LEN		; Modulus Length
+	LD	C,A
+	LD	A,(CONS_IN_HEAD)
 	ENDIF
 	CP	C
 	ENDM
@@ -132,23 +136,36 @@ CONS_PROCESS_SEND:
 CONS_PROCESS_RECEIVE:
 	LD	C,CONS_COM_CH
 	CALL	COM_READ
-	LD	A,0x89
-	LD	(CONS_JACK),A
-; TODO: Save character and check if rx buffer is empty...
-; Save character in input buffer
-; Advance pointer
-; Set rx flag to 1
+	LD	B,A
+
+	ISFULL	IN
+	RET	Z			; If full, return
+
+	LD	A,(CONS_IN_TAIL)
+	ITOADDR	IN,A
+	LD	(HL),B
+	BUF_ADV	CONS_IN_TAIL
+
+	LD	A,0xFF
+	LD	(CONS_NEW_CHAR),A
+
 	RET
 ; ------------------------------------------------------------------------------
 
 CONS_READ_CHAR:
-
-	LD	A,(CONS_JACK)
+	LD	A,(CONS_NEW_CHAR)
 	CP	0x00
 	JP	Z,CONS_READ_CHAR
 
 	XOR	A
-	LD	(CONS_JACK),A
+	LD	(CONS_NEW_CHAR),A
+
+	; Consume char...
+	LD	A,(CONS_IN_HEAD)
+	LD	C,A
+	ITOADDR	IN,C
+	LD	B,(HL)
+	BUF_ADV	CONS_IN_HEAD
 
 	RET
 
