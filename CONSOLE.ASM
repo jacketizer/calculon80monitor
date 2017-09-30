@@ -122,11 +122,11 @@ STOP_TX:
 	RET
 ; ------------------------------------------------------------------------------
 
-CONS_READ:
+CONS_READ_CHAR:
 
 	LD	A,(CONS_JACK)
 	CP	0x00
-	JP	Z,CONS_READ
+	JP	Z,CONS_READ_CHAR
 
 	XOR	A
 	LD	(CONS_JACK),A

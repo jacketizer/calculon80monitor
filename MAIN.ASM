@@ -45,7 +45,7 @@ MAIN:
 	EI				; Enable Interrupts
 
 JACK:
-	CALL	CONS_READ
+	CALL	CONS_READ_CHAR
 	CALL	SEND_JACK
 	JP	JACK
 
