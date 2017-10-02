@@ -1,15 +1,16 @@
 ; ******************************************************************************
-; SHELL
+; Program: SHELL
 ; ******************************************************************************
 ; The shell. Let's users input commands through the console and execute them.
 ; ------------------------------------------------------------------------------
+
+SHELL:	CALL	SHELL_READ_CMD
+	RET
 
 ; Variables
 ; ------------------------------------------------------------------------------
 SHELL_CMD_BUF	DEFS	0x20
 SHELL_CMD_LEN	DEFB	0x00
-
-SHELL:	JP	SHELL_READ_CMD
 
 ; ------------------------------------------------------------------------------
 ; Title:      Read characters into the command buffer, until CR
@@ -30,6 +31,10 @@ SHELL_READ_CHAR:
 	; Then run command
 	; Repeat
 	CALL	CONS_READ_CHAR
+	LD	A,13			; Check for ENTER
+	CP	B
+	RET	Z			; Return if ENTER
+
 	CALL	CONS_WRITE_CHAR
 	DI
 	CALL	CONS_PROCESS_SEND
@@ -40,5 +45,5 @@ SHELL_READ_CHAR:
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; END: SHELL
+; END: Program
 ; ------------------------------------------------------------------------------
