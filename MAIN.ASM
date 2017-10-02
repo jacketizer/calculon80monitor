@@ -44,13 +44,7 @@ MAIN:
 
 	EI				; Enable Interrupts
 
-JACK:
-	CALL	CONS_READ_CHAR
-	CALL	CONS_WRITE_CHAR
-	DI
-	CALL	CONS_PROCESS_SEND
-	EI
-	JP	JACK
+	CALL	SHELL
 
 	HALT
 
@@ -114,5 +108,6 @@ ISR_COM_0:
 	include	"MEM.ASM"
 	include	"COM.ASM"
 	include "CONSOLE.ASM"
+	include "SHELL.ASM"
 
 	END
