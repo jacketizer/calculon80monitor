@@ -14,18 +14,17 @@ CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
 ; Variables
 ; ------------------------------------------------------------------------------
-CONS_OUT_HEAD	DEFB	0x00
+CONS_OUT_HEAD	DEFB	0x00		; Console buffer pointers
 CONS_OUT_TAIL	DEFB	0x00
 CONS_IN_HEAD	DEFB	0x00
 CONS_IN_TAIL	DEFB	0x00
 CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
 CONS_NEW_CHAR	DEFB	0x00
-
 		BSS
-		ALIGN	256		; Buffer needs to be page aligned
-CONS_OUTBUF	DEFS	0x20
-		ALIGN	256		; Buffer needs to be page aligned
-CONS_INBUF	DEFS	0x20
+		ALIGN	256		; Buffers needs to be page aligned
+CONS_OUTBUF	DEFS	0x20		; Console output buffer
+		ALIGN	256
+CONS_INBUF	DEFS	0x20		; Console input buffer
 		CODE
 
 
