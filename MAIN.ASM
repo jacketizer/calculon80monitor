@@ -46,7 +46,8 @@ MAIN:
 
 	CALL	SHELL
 
-	HALT
+JACK:	XOR	A
+	JP	JACK
 
 	; Start Timer 0
 	LD	C,0x00			; Timer 0
@@ -56,23 +57,6 @@ MAIN:
 	CALL	CTC_ENABLE_INT		; Enable interrupts
 
 	HALT				; Wait for interrupts
-
-SEND_JACK:
-	LD	B,"J"
-	CALL	CONS_WRITE_CHAR
-	LD	B,"A"
-	CALL	CONS_WRITE_CHAR
-	LD	B,"C"
-	CALL	CONS_WRITE_CHAR
-	LD	B,"K"
-	CALL	CONS_WRITE_CHAR
-
-	DI
-	CALL	CONS_PROCESS_SEND
-	EI
-	RET
-
-
 
 ISR_TIMER_0:
 	EX	AF,AF'
