@@ -6,7 +6,7 @@
 
 SHELL:
 	LD	DE,SHELL_CMD_BUF		; Read a command from console
-	CALL	CONS_READ_LINE
+	CALL	CONS_READ_LINE_ECHO
 
 	LD	HL,SHELL_CMD_BUF		; Reset command buffer pointer
 	LD	(SHELL_CMD_BUFN),HL

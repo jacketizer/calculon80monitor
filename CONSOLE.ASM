@@ -127,13 +127,13 @@ CONS_READ_CHAR:
 ; Title:      Read line with echo
 ; Desc:       Read characters into a buffer and echo them until enter is read.
 ;             Then null terminate the buffer and return.
-; Name:       CON_READ_LINE
+; Name:       CON_READ_LINE_ECHO
 ;
 ; Entry:      DE = Buffer address to read into
 ; Exit:       [No value]
 ; Registers:  A,B,C,HL,DE
 ; ------------------------------------------------------------------------------
-CONS_READ_LINE:
+CONS_READ_LINE_ECHO:
 	CALL	CONS_READ_CHAR		; Read a character from console
 
 	LD	A,13			; Check for ENTER
@@ -150,7 +150,7 @@ CONS_READ_LINE:
 	CALL	CONS_PROCESS_SEND
 	EI
 
-	JP	CONS_READ_LINE		; Read next...
+	JP	CONS_READ_LINE_ECHO	; Read next...
 
 CONS_READ_ENTER:
 	XOR	A			; Null terminate buffer
