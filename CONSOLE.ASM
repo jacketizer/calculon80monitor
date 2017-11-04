@@ -97,6 +97,33 @@ CONS_WRITE_CHAR:
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
+; Title:      Read a character from the console
+; Desc:       The input is buffered by the driver and is therefore decoupled
+;             from the hardware module.
+; Name:       CON_READ_CHAR
+;
+; Entry:      [No arguments]
+; Exit:       B = Character
+; Registers:  A,B,C,HL
+; ------------------------------------------------------------------------------
+CONS_READ_CHAR:
+	LD	A,(CONS_NEW_CHAR)	; Check unread character flag
+	CP	0x00
+	JP	Z,CONS_READ_CHAR
+
+	XOR	A			; Reset unread character flag
+	LD	(CONS_NEW_CHAR),A
+
+	LD	A,(CONS_IN_HEAD)	; Read character into buffer
+	LD	C,A
+	ITOADDR	IN,C
+	LD	B,(HL)
+	BUF_ADV	CONS_IN_HEAD
+
+	RET
+; ------------------------------------------------------------------------------
+
+; ------------------------------------------------------------------------------
 ; Title:      Send a character if buffer is not empty
 ; Desc:       Uses the COM driver to actually send a character from the output
 ;             buffer.
@@ -151,23 +178,6 @@ CONS_PROCESS_RECEIVE:
 
 	RET
 ; ------------------------------------------------------------------------------
-
-CONS_READ_CHAR:
-	LD	A,(CONS_NEW_CHAR)
-	CP	0x00
-	JP	Z,CONS_READ_CHAR
-
-	XOR	A
-	LD	(CONS_NEW_CHAR),A
-
-	; Consume char...
-	LD	A,(CONS_IN_HEAD)
-	LD	C,A
-	ITOADDR	IN,C
-	LD	B,(HL)
-	BUF_ADV	CONS_IN_HEAD
-
-	RET
 
 ; ------------------------------------------------------------------------------
 ; Title:      Process pending send and receive requests 
