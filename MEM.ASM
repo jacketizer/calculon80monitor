@@ -4,11 +4,14 @@
 ; Driver:  Low level driver for memory testing and mappings
 ; ------------------------------------------------------------------------------
 
+; Constants
+; ------------------------------------------------------------------------------
+BANK_RAM_VAL	EQU	0x01		; Switch out ROM
+BANK_ROM_VAL	EQU	0x00		; Switch out RAM
+
 ; Addresses
 ; ------------------------------------------------------------------------------
 BANK		EQU	0x00		; Back switching device
-BANK_RAM_VAL	EQU	0x01		; Switch out ROM
-BANK_ROM_VAL	EQU	0x00		; Switch out RAM
 
 ; Variables
 ; ------------------------------------------------------------------------------

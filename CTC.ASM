@@ -20,6 +20,10 @@ CTC_ADDR_CH1		EQU	0x29
 CTC_ADDR_CH2		EQU	0x2A
 CTC_ADDR_CH3		EQU	0x2B
 
+; Constants
+; ------------------------------------------------------------------------------
+CTC_DEFAULT_CONF	EQU	0x20	; Prescaler = 1 (256)
+
 ; Variables
 ; ------------------------------------------------------------------------------
 ; Table structure: two bytes per item; Address and Control Byte.
@@ -32,8 +36,6 @@ CTC_TBL:
 			DEFB	CTC_ADDR_CH1,0x00
 			DEFB	CTC_ADDR_CH2,0x00
 			DEFB	CTC_ADDR_CH3,0x00
-
-CTC_DEFAULT_CONF	EQU	0x20	; Prescaler = 1 (256)
 
 ; ------------------------------------------------------------------------------
 ; Title:      Initiate a channel with the default values

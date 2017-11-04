@@ -34,8 +34,11 @@ SHELL_END:
 
 ; Variables
 ; ------------------------------------------------------------------------------
-SHELL_CMD_BUF	DEFS	0x20
 SHELL_CMD_BUFN	DEFW	SHELL_CMD_BUF
+
+		BSS
+SHELL_CMD_BUF	DEFS	0x20
+		CODE
 
 ; ------------------------------------------------------------------------------
 ; END: Program

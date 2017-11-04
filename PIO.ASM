@@ -6,8 +6,8 @@
 
 ; Addresses
 ; ------------------------------------------------------------------------------
-PIO_BASE_OUT			EQU	0x0C
-PIO_BASE_IN			EQU	0x0E
+PIO_BASE_OUT	EQU	0x0C
+PIO_BASE_IN	EQU	0x0E
 
 ; ------------------------------------------------------------------------------
 ; Title:      Write a byte to an output port

@@ -6,25 +6,28 @@
 ;          output is asynchronous and buffered by the driver.
 ; ------------------------------------------------------------------------------
 
-; Addresses
-; ------------------------------------------------------------------------------
-; TODO: The buffers should not be allocated in the binary file...
-		ALIGN	256		; Buffer needs to be page aligned
-CONS_OUTBUF	DEFS	0x20
-		ALIGN	256		; Buffer needs to be page aligned
-CONS_INBUF	DEFS	0x20
-
-; Variables
+; Constants
 ; ------------------------------------------------------------------------------
 CONS_BUF_LEN	EQU	0x1F		; Needs to be a power of two - 1
 CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
+
+; Variables
+; ------------------------------------------------------------------------------
 CONS_OUT_HEAD	DEFB	0x00
 CONS_OUT_TAIL	DEFB	0x00
 CONS_IN_HEAD	DEFB	0x00
 CONS_IN_TAIL	DEFB	0x00
 CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
 CONS_NEW_CHAR	DEFB	0x00
+
+		BSS
+		ALIGN	256		; Buffer needs to be page aligned
+CONS_OUTBUF	DEFS	0x20
+		ALIGN	256		; Buffer needs to be page aligned
+CONS_INBUF	DEFS	0x20
+		CODE
+
 
 ; Macros
 ; ------------------------------------------------------------------------------

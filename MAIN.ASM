@@ -5,26 +5,34 @@
 ;                                                                              ;
 ;==============================================================================;
 
-; RAM Layout
-; ------------------------------------------------------------------------------
-STACK		EQU	0xFFFF		; Start of stack
-
 ; ROM Layout
 ; ------------------------------------------------------------------------------
+ROM_BOOT	EQU	0x0000		; Start of Boot Loader in ROM
 ROM_MAIN	EQU	0x0030		; Start of Main Program in ROM
 
-	ORG	0xE000
+; RAM Layout
+; ------------------------------------------------------------------------------
+RAM_STACK	EQU	0xFFFF		; Start of stack in RAM
+RAM_MAIN	EQU	0xE000		; Start of Main Program in RAM
+RAM_BSS		EQU	0x2000		; Start of uninitialized data in RAM
+
+; Segment Definitions
+; ------------------------------------------------------------------------------
+	BSS
+	ORG	RAM_BSS
+	CODE
+	ORG	RAM_MAIN
 
 ; MAIN PROGRAM
 ; ******************************************************************************
 ; Program: Main Program
-; Purpose: Let the user control the computer.
+; Purpose: Let's the user control the computer.
 ; ------------------------------------------------------------------------------
 MAIN:
 
 ; Init Stage 1
 ; ..............................................................................
-	LD	SP,STACK		; Set stack pointer
+	LD	SP,RAM_STACK		; Set stack pointer
 	CALL	MEM_ROM_OUT		; Switch out ROM
 
 	CALL	ISR_INIT		; Set interrupt mode and register
@@ -46,8 +54,9 @@ MAIN:
 
 	CALL	SHELL
 
-JACK:	XOR	A
-	JP	JACK
+FOREVER:
+	XOR	A
+	JP	FOREVER
 
 	; Start Timer 0
 	LD	C,0x00			; Timer 0
