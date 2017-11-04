@@ -124,6 +124,43 @@ CONS_READ_CHAR:
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
+; Title:      Read line with echo
+; Desc:       Read characters into a buffer and echo them until enter is read.
+;             Then null terminate the buffer and return.
+; Name:       CON_READ_LINE
+;
+; Entry:      DE = Buffer address to read into
+; Exit:       [No value]
+; Registers:  A,B,C,HL,DE
+; ------------------------------------------------------------------------------
+CONS_READ_LINE:
+	CALL	CONS_READ_CHAR		; Read a character from console
+
+	LD	A,13			; Check for ENTER
+	CP	B
+	JP	Z,CONS_READ_ENTER
+
+	LD	A,B			; Store character
+	LD	(DE),A
+
+	INC	DE			; Increment buffer pointer
+
+	CALL	CONS_WRITE_CHAR		; Echo character
+	DI
+	CALL	CONS_PROCESS_SEND
+	EI
+
+	JP	CONS_READ_LINE		; Read next...
+
+CONS_READ_ENTER:
+	XOR	A			; Null terminate buffer
+	LD	(DE),A
+
+	RET
+; ------------------------------------------------------------------------------
+
+
+; ------------------------------------------------------------------------------
 ; Title:      Send a character if buffer is not empty
 ; Desc:       Uses the COM driver to actually send a character from the output
 ;             buffer.
