@@ -131,7 +131,7 @@ CONS_READ_CHAR:
 ;             Then null terminate the buffer and return.
 ; Name:       CON_READ_LINE_ECHO
 ;
-; Entry:      DE = Buffer address to read into
+; Entry:      DE = Buffer pointer to read characters into
 ; Exit:       [No value]
 ; Registers:  A,B,C,HL,DE
 ; ------------------------------------------------------------------------------
@@ -161,6 +161,35 @@ CONS_READ_ENTER:
 	RET
 ; ------------------------------------------------------------------------------
 
+; ------------------------------------------------------------------------------
+; Title:      Write a string to the console
+; Name:       CON_WRITE_STRING
+;
+; Entry:      DE = Buffer pointer
+; Exit:       [No value]
+; Registers:  A,B,C,HL,DE
+; ------------------------------------------------------------------------------
+CONS_WRITE_STRING:
+	LD	A,(DE)			; Retrieve character
+	LD	B,A
+
+	XOR	A			; Check for end of string
+	CP	B
+	JP	Z,CONS_WRITE_STRING_END
+
+	CALL	CONS_WRITE_CHAR		; Write character to console
+
+	INC	DE			; Increment buffer pointer
+
+	JP	CONS_WRITE_STRING	; Write next...
+
+CONS_WRITE_STRING_END:
+	DI
+	CALL	CONS_PROCESS_SEND
+	EI
+
+	RET
+; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
 ; Title:      Send a character if buffer is not empty
