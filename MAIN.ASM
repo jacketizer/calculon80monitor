@@ -7,7 +7,7 @@
 
 ; ROM Layout
 ; ------------------------------------------------------------------------------
-ROM_BOOT	EQU	0x0000		; Start of Boot Loader in ROM
+ROM_BOOT	EQU	0x0000		; Start of Bootloader in ROM
 ROM_MAIN	EQU	0x0030		; Start of Main Program in ROM
 
 ; RAM Layout
