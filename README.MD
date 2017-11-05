@@ -24,7 +24,7 @@ RAM Layout
     0xFFFF     Stack Top
     0xF000     Stack Bottom
     0xE000     Main Program
-    0x2000     BSS: Uninitialized data used by Main Program
+    0xDC00     BSS: Uninitialized Data
     0x0000     Page Zero: ISR
 
 Device Addresses

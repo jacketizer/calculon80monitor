@@ -14,7 +14,7 @@ ROM_MAIN	EQU	0x0030		; Start of Main Program in ROM
 ; ------------------------------------------------------------------------------
 RAM_STACK	EQU	0xFFFF		; Start of stack in RAM
 RAM_MAIN	EQU	0xE000		; Start of Main Program in RAM
-RAM_BSS		EQU	0x2000		; Start of uninitialized data in RAM
+RAM_BSS		EQU	0xDC00		; Start of uninitialized data in RAM
 
 ; Segment Definitions
 ; ------------------------------------------------------------------------------
