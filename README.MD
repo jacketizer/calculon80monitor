@@ -98,62 +98,63 @@ BIOS in CP/M and MS-DOS, except that they are invoked as subroutines instead of
 system calls (using interrupts or jump tables). The idea is to re-use these
 drivers when writing a DOS and to adapt them to allow system calls etc.
 
-#### COM
+#### COM: Character Device Communication Driver
 
-COM_INIT
-COM_STATUS
-COM_READ
-COM_WRITE
-COM_TX_OFF
-COM_TX_ON
+##### COM_INIT
+##### COM_STATUS
+##### COM_READ
+##### COM_WRITE
+##### COM_TX_OFF
+##### COM_TX_ON
 
-#### ISR
+#### ISR: Interrupt Service Routine Driver
 
-ISR_INIT
-ISR_INSTALL
+Subroutines for installing interrupt service routines.
 
-#### CTC
+##### ISR_INIT
+##### ISR_INSTALL
 
-CTC_INIT
-CTC_ENABLE_INT
-CTC_DISABLE_INT
-CTC_SET_VAL
+#### CTC: General Purpose Timer Driver
 
-#### PIO
+##### CTC_INIT
+##### CTC_ENABLE_INT
+##### CTC_DISABLE_INT
+##### CTC_SET_VAL
 
-PIO_INIT
-PIO_READ
-PIO_WRITE
+#### PIO Parallel I/O Driver
 
-#### MEM
+##### PIO_INIT
+##### PIO_READ
+##### PIO_WRITE
 
-MEM_TEST
-MEM_ROM_IN
-MEM_ROM_OUT
-MEM_BANK_STATE
+#### MEM Memory Testing and Mapping
+
+##### MEM_TEST
+##### MEM_ROM_IN
+##### MEM_ROM_OUT
+##### MEM_BANK_STATE
 
 #### HDD (not implemented yet)
 
-HDD_READ_STATUS
-HDD_READ_ERR
-HDD_IDENTIFY
-HDD_EXEC_DIAG
-HDD_RESET
-HDD_FORMAT_TRACK
+##### HDD_READ_STATUS
+##### HDD_READ_ERR
+##### HDD_IDENTIFY
+##### HDD_EXEC_DIAG
+##### HDD_RESET
+##### HDD_FORMAT_TRACK
+##### HDD_RECALIBRATE
+##### HDD_READ_SECTOR
+##### HDD_WRITE_SECTOR
 
-HDD_RECALIBRATE
-HDD_READ_SECTOR
-HDD_WRITE_SECTOR
-
-#### CONSOLE
+#### CONSOLE Console Driver
 
 This is a pseudo device driver that wraps a COM channel to allow buffered
 input and output as well as a more user friendly user interaction. It abstracts
 the console and does not necessarily need to utilize the COM driver for this, if
 a graphics device and keyboard is available, it could be used instead.
 
-CONS_WRITE_CHAR
-CONS_READ_CHAR
-CONS_READ_LINE_ECHO
-CONS_WRITE_STRING
-CONS_PROCESS
+##### CONS_WRITE_CHAR
+##### CONS_READ_CHAR
+##### CONS_READ_LINE_ECHO
+##### CONS_WRITE_STRING
+##### CONS_PROCESS
