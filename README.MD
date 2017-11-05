@@ -100,51 +100,30 @@ drivers when writing a DOS and to adapt them to allow system calls etc.
 
 #### COM: Character Device Communication Driver
 
-##### COM_INIT
-##### COM_STATUS
-##### COM_READ
-##### COM_WRITE
-##### COM_TX_OFF
-##### COM_TX_ON
+COM_INIT, COM_STATUS, COM_READ, COM_WRITE, COM_TX_OFF, COM_TX_ON
 
 #### ISR: Interrupt Service Routine Driver
 
 Subroutines for installing interrupt service routines.
 
-##### ISR_INIT
-##### ISR_INSTALL
+ISR_INIT, ISR_INSTALL
 
 #### CTC: General Purpose Timer Driver
 
-##### CTC_INIT
-##### CTC_ENABLE_INT
-##### CTC_DISABLE_INT
-##### CTC_SET_VAL
+CTC_INIT, CTC_ENABLE_INT, CTC_DISABLE_INT, CTC_SET_VAL
 
 #### PIO Parallel I/O Driver
 
-##### PIO_INIT
-##### PIO_READ
-##### PIO_WRITE
+PIO_INIT, PIO_READ, PIO_WRITE
 
 #### MEM Memory Testing and Mapping
 
-##### MEM_TEST
-##### MEM_ROM_IN
-##### MEM_ROM_OUT
-##### MEM_BANK_STATE
+MEM_TEST, MEM_ROM_IN, MEM_ROM_OUT, MEM_BANK_STATE
 
 #### HDD (not implemented yet)
 
-##### HDD_READ_STATUS
-##### HDD_READ_ERR
-##### HDD_IDENTIFY
-##### HDD_EXEC_DIAG
-##### HDD_RESET
-##### HDD_FORMAT_TRACK
-##### HDD_RECALIBRATE
-##### HDD_READ_SECTOR
-##### HDD_WRITE_SECTOR
+HDD_READ_STATUS, HDD_READ_ERR, HDD_IDENTIFY, HDD_EXEC_DIAG, HDD_RESET, HDD_FORMAT_TRACK,
+HDD_RECALIBRATE, HDD_READ_SECTOR, HDD_WRITE_SECTOR
 
 #### CONSOLE Console Driver
 
@@ -153,8 +132,4 @@ input and output as well as a more user friendly user interaction. It abstracts
 the console and does not necessarily need to utilize the COM driver for this, if
 a graphics device and keyboard is available, it could be used instead.
 
-##### CONS_WRITE_CHAR
-##### CONS_READ_CHAR
-##### CONS_READ_LINE_ECHO
-##### CONS_WRITE_STRING
-##### CONS_PROCESS
+CONS_WRITE_CHAR, CONS_READ_CHAR, CONS_READ_LINE_ECHO, CONS_WRITE_STRING, CONS_PROCESS
