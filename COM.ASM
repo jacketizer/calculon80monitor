@@ -12,7 +12,7 @@ COM_CTRL_B	EQU	0x13
 
 ; Variables
 ; ------------------------------------------------------------------------------
-TX_OFF		DEFB	0x01
+TX_OFF		DEFB	FALSE
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ COM_CFG:
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
-	LD	A,0x00
+	LD	A,FALSE
 	LD	(TX_OFF),A
 
 	RET
@@ -119,7 +119,7 @@ COM_TX_OFF:
 	WR_REG	5,0xE2			; WR5: 8-bit, Tx disabled, RTS, DTR
 	WR_REG	1,0x18			; WR1: Tx interrupts disabled
 
-	LD	A,0xFF
+	LD	A,TRUE
 	LD	(TX_OFF),A
 
 	RET
@@ -144,7 +144,7 @@ COM_TX_ON:
 	WR_REG	5,0xEA			; WR5: 8-bit, Tx enabled, RTS
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
-	XOR 	A
+	LD	A,FALSE
 	LD	(TX_OFF),A
 
 	RET
@@ -155,7 +155,7 @@ COM_TX_ON:
 ; Name:       COM_TX_STATE
 ;
 ; Entry:      C = Channel Index (0..1)
-; Exit:       A = Tx State (0 = On, 1 = Off)
+; Exit:       A = Tx State (FALSE = On, TRUE = Off)
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
 COM_TX_STATE:
