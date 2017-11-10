@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; INTERRUPT SERVICE ROUTINE DRIVER
 ; ******************************************************************************
-; Driver:  Functions to install interrupt service routines
+; Driver:  Functions to install interrupt service routines.
 ; ------------------------------------------------------------------------------
 
 ; Addresses

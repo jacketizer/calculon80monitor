@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; Program: SHELL
 ; ******************************************************************************
-; The shell. Let's users input commands through the console and execute them.
+; The shell. Lets users input commands through the console and execute them.
 ; ------------------------------------------------------------------------------
 
 ; Variables
@@ -26,9 +26,9 @@ SHELL:
 	LD	DE,SHELL_CMD_BUF	; Read a command from console
 	CALL	CONS_READ_LINE_ECHO
 
-	LD	B,13			; Print a line line
+	LD	B,"\r"			; Print a line line
 	CALL	CONS_WRITE_CHAR
-	LD	B,10
+	LD	B,"\n"
 	CALL	CONS_WRITE_CHAR
 
 	LD	DE,SHELL_CMD_BUF	; Print the entered command to console

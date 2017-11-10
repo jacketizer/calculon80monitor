@@ -128,7 +128,7 @@ Subroutines for installing interrupt service routines.
 
 #### HDD (not implemented yet)
 
-`HDD_READ_STATUS, `HDD_READ_ERR`, `HDD_IDENTIFY`, `HDD_EXEC_DIAG`, `HDD_RESET`, `HDD_FORMAT_TRACK`,
+`HDD_READ_STATUS`, `HDD_READ_ERR`, `HDD_IDENTIFY`, `HDD_EXEC_DIAG`, `HDD_RESET`, `HDD_FORMAT_TRACK`,
 `HDD_RECALIBRATE`, `HDD_READ_SECTOR`, `HDD_WRITE_SECTOR`
 
 #### CONSOLE: Console Pseudo Driver
@@ -138,4 +138,4 @@ input and output as well as a more user friendly user interaction. It abstracts
 the console and does not necessarily need to utilize the COM driver for this, if
 a graphics device and keyboard is available, it could be used instead.
 
-`CONS_WRITE_CHAR`, `CONS_READ_CHAR`, `CONS_READ_LINE_ECHO`, `CONS_WRITE_STRING`, `CONS_PROCESS`
+`CONS_WRITE_CHAR`, `CONS_READ_CHAR`, `CONS_READ_LINE_ECHO`, `CONS_WRITE_STRING`, `CONS_ISR`, `CONS_MAIN`

@@ -26,7 +26,7 @@ RAM_BSS		EQU	0xDC00		; Start of uninitialized data in RAM
 ; MAIN PROGRAM
 ; ******************************************************************************
 ; Program: Main Program
-; Purpose: Let's the user control the computer.
+; Purpose: Lets the user control the computer.
 ; ------------------------------------------------------------------------------
 MAIN:
 
@@ -39,39 +39,34 @@ MAIN:
 	CALL	CTC_INIT		; Initiate CTC driver
 	CALL	COM_INIT		; Initiate COM driver
 
-	LD	L,0x00			; Install ISR CTC:0
+	LD	L,0x00			; Install ISR COM:0
 	LD	BC,ISR_COM_0
 	CALL	ISR_INSTALL
 
-	LD	L,0x0C			; Install ISR COM:0
-	LD	BC,ISR_COM_0
+	LD	L,0x10			; Install ISR CTC:0
+	LD	BC,ISR_TIMER_0
 	CALL	ISR_INSTALL
 
 	LD	C,0x00			; Configure COM:0
 	CALL	COM_CFG
 
-	EI				; Enable Interrupts
+	LD	C,0x00			; Start timer 0
+	LD	D,0xFF			; Value = 255
+	CALL	CTC_SET_VAL
+	LD	C,0x00			; Enable interrupts for timer 0
+	CALL	CTC_ENABLE_INT
 
-	CALL	SHELL
+	EI				; Enable interrupts
 
-FOREVER:
-	XOR	A
-	JP	FOREVER
+	CALL	SHELL			; Start shell
 
-	; Start Timer 0
-	LD	C,0x00			; Timer 0
-	LD	D,0xFF			; Timer constant
-	CALL	CTC_SET_VAL		; Set timer value
-	LD	C,0x00			; Timer 0
-	CALL	CTC_ENABLE_INT		; Enable interrupts
-
-	HALT				; Wait for interrupts
+	HALT				; Halt and wait for interrupts
 
 ISR_TIMER_0:
 	EX	AF,AF'
 	EXX
 
-	CALL	CONS_PROCESS_SEND
+	CALL	CONS_MAIN
 
 	EXX
 	EX	AF,AF'
@@ -82,7 +77,7 @@ ISR_COM_0:
 	EX	AF,AF'
 	EXX
 
-	CALL	CONS_PROCESS
+	CALL	CONS_ISR
 
 	EXX
 	EX	AF,AF'

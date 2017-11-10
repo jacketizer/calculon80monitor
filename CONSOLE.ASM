@@ -1,9 +1,11 @@
 ; ******************************************************************************
 ; CONSOLE DRIVER
 ; ******************************************************************************
-; Driver:  Console Driver
-;          Let's programs print, read and control the console. The input and
+; Driver:  Console driver implementation utilizing a COM channel.
+;          Lets programs control, print and read to the console. The input and
 ;          output is asynchronous and buffered by the driver.
+;          This implementation uses a COM channel to communicate with a terminal
+;          to serve as a console for the user.
 ; ------------------------------------------------------------------------------
 
 ; Constants
@@ -82,7 +84,7 @@ BUF_ADV	MACRO	POINTER
 ; Desc:       Write a character to the console at the current position. The
 ;             output is buffered by the driver and is therefore decoupled from
 ;             the hardware module.
-; Name:       CON_WRITE_CHAR
+; Name:       CONS_WRITE_CHAR
 ;
 ; Entry:      B = Character
 ; Exit:       [No value]
@@ -102,7 +104,7 @@ CONS_WRITE_CHAR:
 ; Title:      Read a character from the console
 ; Desc:       The input is buffered by the driver and is therefore decoupled
 ;             from the hardware module.
-; Name:       CON_READ_CHAR
+; Name:       CONS_READ_CHAR
 ;
 ; Entry:      [No arguments]
 ; Exit:       B = Character
@@ -129,7 +131,7 @@ CONS_READ_CHAR:
 ; Title:      Read line with echo
 ; Desc:       Read characters into a buffer and echo them until enter is read.
 ;             Then null terminate the buffer and return.
-; Name:       CON_READ_LINE_ECHO
+; Name:       CONS_READ_LINE_ECHO
 ;
 ; Entry:      DE = Buffer pointer to read characters into
 ; Exit:       [No value]
@@ -148,9 +150,6 @@ CONS_READ_LINE_ECHO:
 	INC	DE			; Increment buffer pointer
 
 	CALL	CONS_WRITE_CHAR		; Echo character
-	DI
-	CALL	CONS_PROCESS_SEND
-	EI
 
 	JP	CONS_READ_LINE_ECHO	; Read next...
 
@@ -163,7 +162,7 @@ CONS_READ_ENTER:
 
 ; ------------------------------------------------------------------------------
 ; Title:      Write a string to the console
-; Name:       CON_WRITE_STRING
+; Name:       CONS_WRITE_STRING
 ;
 ; Entry:      DE = Buffer pointer
 ; Exit:       [No value]
@@ -175,20 +174,13 @@ CONS_WRITE_STRING:
 
 	XOR	A			; Check for end of string
 	CP	B
-	JP	Z,CONS_WRITE_STRING_END
+	RET	Z
 
 	CALL	CONS_WRITE_CHAR		; Write character to console
 
 	INC	DE			; Increment buffer pointer
 
 	JP	CONS_WRITE_STRING	; Write next...
-
-CONS_WRITE_STRING_END:
-	DI
-	CALL	CONS_PROCESS_SEND
-	EI
-
-	RET
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
@@ -201,7 +193,7 @@ CONS_WRITE_STRING_END:
 ; Exit:       [No value]
 ; Registers:  A,B,C,HL
 ; ------------------------------------------------------------------------------
-CONS_PROCESS_SEND:
+CONS_ISR_SEND:
 	ISEMPTY	OUT
 	LD	C,CONS_COM_CH
 	JP	Z,COM_TX_OFF
@@ -228,7 +220,7 @@ CONS_PROCESS_SEND:
 ; Exit:       [No value]
 ; Registers:  A,B,C,HL
 ; ------------------------------------------------------------------------------
-CONS_PROCESS_RECEIVE:
+CONS_ISR_RECEIVE:
 	LD	C,CONS_COM_CH
 	CALL	COM_READ
 	LD	B,A
@@ -250,25 +242,46 @@ CONS_PROCESS_RECEIVE:
 ; ------------------------------------------------------------------------------
 ; Title:      Process pending send and receive requests 
 ; Desc:       Sends or receives characters from the hardware module depending on
-;             the status. This function should be called evertime an interrupt
+;             the status. This function should be called everytime an interrupt
 ;             is triggered by the hardware module.
-; Name:       CON_PROCESS
+; Name:       CONS_PROCESS
 ;
 ; Entry:      [No arguments]
 ; Exit:       [No value]
 ; Registers:  A,B,C,D,HL
 ; ------------------------------------------------------------------------------
-CONS_PROCESS:
-	LD	C,CONS_COM_CH
+CONS_ISR:
+	LD	C,CONS_COM_CH		; Retrieve status word from COM channel
 	CALL	COM_STATUS
 	LD	(CONS_COM_STATUS),A
 
-	BIT	6,A
-	CALL	NZ,CONS_PROCESS_RECEIVE
+	BIT	6,A			; Check if character is available
+	CALL	NZ,CONS_ISR_RECEIVE
 
-	LD	A,(CONS_COM_STATUS)
-	BIT	5,A
-	CALL	NZ,CONS_PROCESS_SEND
+	LD	A,(CONS_COM_STATUS)	; Check if hw buffer is empty, if so,
+	BIT	5,A			; send next character
+	CALL	NZ,CONS_ISR_SEND
+
+	RET
+; ------------------------------------------------------------------------------
+
+; ------------------------------------------------------------------------------
+; Title:      Cyclic main procedure
+; Desc:       Should be called periodically by OS. The purpose of this is to
+;             initiate transmission when needed.
+; Name:       CONS_PROCESS
+;
+; Entry:      [No arguments]
+; Exit:       [No value]
+; Registers:  A,B,C,D,HL
+; ------------------------------------------------------------------------------
+CONS_MAIN:
+	LD	C,CONS_COM_CH		; Return if Tx is already ongoing
+	CALL	COM_TX_STATE
+	CP	0x00
+	RET	Z
+
+	CALL	CONS_ISR_SEND		; Start transmission
 
 	RET
 ; ------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; PARALLEL IO PORT DRIVER
 ; ******************************************************************************
-; Driver: Functions to read and write to the GPIO ports
+; Driver: Functions to read and write to the GPIO ports.
 ; ------------------------------------------------------------------------------
 
 ; Addresses

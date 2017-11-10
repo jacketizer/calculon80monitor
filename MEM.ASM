@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; MEMORY MANAGEMENT DRIVER
 ; ******************************************************************************
-; Driver:  Low level driver for memory testing and mappings
+; Driver:  Driver for memory testing and mappings.
 ; ------------------------------------------------------------------------------
 
 ; Constants

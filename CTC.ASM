@@ -1,7 +1,7 @@
 ; ******************************************************************************
 ; CTC DRIVER
 ; ******************************************************************************
-; Driver:  Low level driver for the CTC
+; Driver:  Driver for the Z80 CTC.
 ;          Controls the Z80 CTC by abstracting the use of the control register:
 ;          Bit 7: Interrupt, 1 = Enable, 0 = Disable
 ;          Bit 6: Mode, 1 = Counter, 0 = Timer
@@ -78,7 +78,7 @@ CTC_CFG:
 	INC	A			; Set temporary bit 0, 1 = Control
 	OUT	(C),A			; Execute
 
-	XOR	A			; Set interrupt vector
+	LD	A,0x10			; Set interrupt vector
 	OUT	(C),A
 	RET
 ; ------------------------------------------------------------------------------
