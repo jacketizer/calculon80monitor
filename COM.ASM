@@ -12,7 +12,9 @@ COM_CTRL_B	EQU	0x13
 
 ; Variables
 ; ------------------------------------------------------------------------------
-TX_OFF		DEFB	FALSE
+		BSS
+TX_OFF		DEFB	TRUE
+		CODE
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -94,7 +96,7 @@ COM_CFG:
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
-	LD	A,FALSE
+	LD	A,TRUE
 	LD	(TX_OFF),A
 
 	RET
