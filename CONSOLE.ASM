@@ -10,7 +10,7 @@
 
 ; Constants
 ; ------------------------------------------------------------------------------
-CONS_BUF_LEN	EQU	0x1F		; Needs to be a power of two - 1
+CONS_BUF_LEN	EQU	0xFF		; Needs to be a power of two - 1
 CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
 
@@ -24,9 +24,9 @@ CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
 CONS_NEW_CHAR	DEFB	0x00
 		BSS
 		ALIGN	256		; Buffers needs to be page aligned
-CONS_OUTBUF	DEFS	0x20		; Console output buffer
+CONS_OUTBUF	DEFS	0x100		; Console output buffer
 		ALIGN	256
-CONS_INBUF	DEFS	0x20		; Console input buffer
+CONS_INBUF	DEFS	0x100		; Console input buffer
 		CODE
 
 
@@ -93,10 +93,12 @@ BUF_ADV	MACRO	POINTER
 CONS_WRITE_CHAR:
 	ISFULL	OUT
 	RET	Z			; If full, return
-	LD	A,(CONS_OUT_TAIL)
+
+	LD	A,(CONS_OUT_TAIL)	; Push character to buffer
 	ITOADDR	OUT,A
 	LD	(HL),B
 	BUF_ADV	CONS_OUT_TAIL
+
 	RET
 ; ------------------------------------------------------------------------------
 
@@ -278,7 +280,7 @@ CONS_ISR:
 CONS_MAIN:
 	LD	C,CONS_COM_CH		; Return if Tx is already ongoing
 	CALL	COM_TX_STATE
-	CP	0x00
+	CP	FALSE
 	RET	Z
 
 	CALL	CONS_ISR_SEND		; Start transmission
