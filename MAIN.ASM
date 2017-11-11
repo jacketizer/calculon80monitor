@@ -58,6 +58,9 @@ MAIN:
 
 	EI				; Enable interrupts
 
+	LD	DE,WELCOME		; Print welcome text
+	CALL	CONS_WRITE_STRING
+
 	CALL	SHELL			; Start shell
 
 	HALT				; Halt and wait for interrupts
@@ -83,6 +86,12 @@ ISR_COM_0:
 	EX	AF,AF'
 	EI
 	RETI
+
+; Constants
+; ------------------------------------------------------------------------------
+WELCOME:	DB	"\r\nJ89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
+		DB	"Copyright (c) 2017 Jack Engqvist Johansson\r\n"
+		DB	0x00
 
 ; ------------------------------------------------------------------------------
 ; END: Main Program
