@@ -6,15 +6,20 @@
 
 ; Addresses
 ; ------------------------------------------------------------------------------
-COM_BASE_ADDR	EQU	0x10
-COM_CTRL_A	EQU	0x11
-COM_CTRL_B	EQU	0x13
+COM_BASE_ADDR		EQU	0x10
+COM_CTRL_A		EQU	0x11
+COM_CTRL_B		EQU	0x13
+
+; Constants
+; ------------------------------------------------------------------------------
+COM_TX_STATE_OFF	EQU	FALSE
+COM_TX_STATE_ON		EQU	TRUE
 
 ; Variables
 ; ------------------------------------------------------------------------------
-		BSS
-TX_OFF		DEFB	TRUE
-		CODE
+			BSS
+TX_STATE		DEFB	COM_TX_STATE_OFF
+			CODE
 
 ; Macros
 ; ------------------------------------------------------------------------------
@@ -96,8 +101,8 @@ COM_CFG:
 	WR_REG	3,0xC1			; WR3: 8-bit, Rx enabled
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
-	LD	A,TRUE
-	LD	(TX_OFF),A
+	LD	A,COM_TX_STATE_OFF
+	LD	(TX_STATE),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -111,9 +116,9 @@ COM_CFG:
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
 COM_TX_OFF:
-	LD	A,(TX_OFF)
-	CP	0x00
-	RET	NZ
+	LD	A,(TX_STATE)
+	CP	COM_TX_STATE_OFF
+	RET	Z
 
 	FIX_IDX
 	INC	C			; Set to control address
@@ -121,8 +126,8 @@ COM_TX_OFF:
 	WR_REG	5,0xE2			; WR5: 8-bit, Tx disabled, RTS, DTR
 	WR_REG	1,0x18			; WR1: Tx interrupts disabled
 
-	LD	A,TRUE
-	LD	(TX_OFF),A
+	LD	A,COM_TX_STATE_OFF
+	LD	(TX_STATE),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -136,8 +141,8 @@ COM_TX_OFF:
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
 COM_TX_ON:
-	LD	A,(TX_OFF)
-	CP	0x00
+	LD	A,(TX_STATE)
+	CP	COM_TX_STATE_ON
 	RET	Z
 
 	FIX_IDX
@@ -146,8 +151,8 @@ COM_TX_ON:
 	WR_REG	5,0xEA			; WR5: 8-bit, Tx enabled, RTS
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
-	LD	A,FALSE
-	LD	(TX_OFF),A
+	LD	A,COM_TX_STATE_ON
+	LD	(TX_STATE),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -161,7 +166,7 @@ COM_TX_ON:
 ; Registers:  A,C 
 ; ------------------------------------------------------------------------------
 COM_TX_STATE:
-	LD	A,(TX_OFF)
+	LD	A,(TX_STATE)
 	RET
 ; ------------------------------------------------------------------------------
 

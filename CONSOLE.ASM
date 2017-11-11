@@ -280,7 +280,7 @@ CONS_ISR:
 CONS_MAIN:
 	LD	C,CONS_COM_CH		; Return if Tx is already ongoing
 	CALL	COM_TX_STATE
-	CP	FALSE
+	CP	COM_TX_STATE_ON
 	RET	Z
 
 	CALL	CONS_ISR_SEND		; Start transmission
