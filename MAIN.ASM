@@ -89,7 +89,7 @@ ISR_COM_0:
 
 ; Constants
 ; ------------------------------------------------------------------------------
-WELCOME:	DB	"\r\nJ89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
+WELCOME		DB	"\r\nJ89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
 		DB	"Copyright (c) 2017 Jack Engqvist Johansson\r\n"
 		DB	0x00
 
