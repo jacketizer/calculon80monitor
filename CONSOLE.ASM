@@ -142,7 +142,7 @@ CONS_READ_CHAR:
 CONS_READ_LINE_ECHO:
 	CALL	CONS_READ_CHAR		; Read a character from console
 
-	LD	A,"\r"			; Check for ENTER
+	LD	A,ASCII_CR		; Check for ENTER
 	CP	B
 	JP	Z,CONS_READ_ENTER
 

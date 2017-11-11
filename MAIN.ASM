@@ -58,7 +58,7 @@ MAIN:
 
 	EI				; Enable interrupts
 
-	LD	DE,WELCOME		; Print welcome text
+	LD	DE,WELCOME_TXT		; Print welcome text
 	CALL	CONS_WRITE_STRING
 
 	CALL	SHELL			; Start shell
@@ -89,9 +89,10 @@ ISR_COM_0:
 
 ; Constants
 ; ------------------------------------------------------------------------------
-WELCOME		DB	"\r\nJ89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
+WELCOME_TXT	DB	ASCII_FF,ASCII_BELL
+		DB	"J89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
 		DB	"Copyright (c) 2017 Jack Engqvist Johansson\r\n"
-		DB	0x00
+		DB	ASCII_NULL
 
 ; ------------------------------------------------------------------------------
 ; END: Main Program
@@ -100,6 +101,7 @@ WELCOME		DB	"\r\nJ89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
 ; Lib Includes
 ; ------------------------------------------------------------------------------
 	include	"DEFINES.ASM"
+	include	"ASCII.ASM"
 
 ; Driver Includes
 ; ------------------------------------------------------------------------------

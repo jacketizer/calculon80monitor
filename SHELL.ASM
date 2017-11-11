@@ -6,7 +6,7 @@
 
 ; Constants
 ; ------------------------------------------------------------------------------
-SHELL_PROMPT	DB	"\r\nCALCULON80> ",0
+SHELL_PROMPT	DB	"\r\nCALCULON80> ",ASCII_NULL
 
 ; Variables
 ; ------------------------------------------------------------------------------
@@ -29,9 +29,9 @@ SHELL:
 	LD	DE,SHELL_CMD_BUF	; Read a command from console
 	CALL	CONS_READ_LINE_ECHO
 
-	LD	B,"\r"			; Print a line line
+	LD	B,ASCII_CR		; Print a line line
 	CALL	CONS_WRITE_CHAR
-	LD	B,"\n"
+	LD	B,ASCII_LF
 	CALL	CONS_WRITE_CHAR
 
 	LD	DE,SHELL_CMD_BUF	; Print the entered command to console
