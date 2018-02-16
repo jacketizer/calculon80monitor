@@ -31,8 +31,7 @@ CTC_DEFAULT_CONF	EQU	0x20	; Prescaler = 1 (256)
 ; Control Register: Stores each timers configuration, bits 0, 1 and 2 should
 ;                   always be 0 except temporary when actually programming the
 ;                   CTC channel.
-CTC_TBL:
-			DEFB	CTC_ADDR_CH0,0x00
+CTC_TBL			DEFB	CTC_ADDR_CH0,0x00
 			DEFB	CTC_ADDR_CH1,0x00
 			DEFB	CTC_ADDR_CH2,0x00
 			DEFB	CTC_ADDR_CH3,0x00

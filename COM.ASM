@@ -18,7 +18,8 @@ COM_TX_STATE_ON		EQU	TRUE
 ; Variables
 ; ------------------------------------------------------------------------------
 			BSS
-TX_STATE		DEFB	COM_TX_STATE_OFF
+TX_STATE_TBL		DEFB	COM_TX_STATE_OFF	; Tx State for Channel A
+			DEFB	COM_TX_STATE_OFF	; Tx State for Channel B
 			CODE
 
 ; Macros
@@ -26,8 +27,15 @@ TX_STATE		DEFB	COM_TX_STATE_OFF
 FIX_IDX	MACRO
 	LD	A,COM_BASE_ADDR		; Load base addr
 	RLC	C			; Multiply index by two
-	ADD	A,C			; Merge
+	ADD	A,C
 	LD	C,A
+	ENDM
+
+TBL_IDX	MACRO	TBL
+	LD	B,0x00			; Clear B
+	LD	HL,TBL			; Load table start to HL
+	ADD	HL,BC			; Add index to HL
+	LD	A,(HL)			; Load value to A
 	ENDM
 
 RD_REG	MACRO	REG
@@ -102,7 +110,8 @@ COM_CFG:
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
 
 	LD	A,COM_TX_STATE_OFF
-	LD	(TX_STATE),A
+	LD	(TX_STATE_TBL),A
+	LD	(TX_STATE_TBL+1),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -113,21 +122,20 @@ COM_CFG:
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       [No value]
-; Registers:  A,C 
+; Registers:  A,BC,HL
 ; ------------------------------------------------------------------------------
 COM_TX_OFF:
-	LD	A,(TX_STATE)
+	TBL_IDX	TX_STATE_TBL		; Load channel state to A and addr to HL
 	CP	COM_TX_STATE_OFF
 	RET	Z
+
+	LD	(HL),COM_TX_STATE_OFF
 
 	FIX_IDX
 	INC	C			; Set to control address
 
 	WR_REG	5,0xE2			; WR5: 8-bit, Tx disabled, RTS, DTR
 	WR_REG	1,0x18			; WR1: Tx interrupts disabled
-
-	LD	A,COM_TX_STATE_OFF
-	LD	(TX_STATE),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -138,21 +146,20 @@ COM_TX_OFF:
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       [No value]
-; Registers:  A,C 
+; Registers:  A,BC,HL 
 ; ------------------------------------------------------------------------------
 COM_TX_ON:
-	LD	A,(TX_STATE)
+	TBL_IDX	TX_STATE_TBL		; Load channel state to A and addr to HL
 	CP	COM_TX_STATE_ON
 	RET	Z
+
+	LD	(HL),COM_TX_STATE_ON
 
 	FIX_IDX
 	INC	C			; Set to control address
 
 	WR_REG	5,0xEA			; WR5: 8-bit, Tx enabled, RTS
 	WR_REG	1,0x1A			; WR1: Rx and Tx interrupts enabled
-
-	LD	A,COM_TX_STATE_ON
-	LD	(TX_STATE),A
 
 	RET
 ; ------------------------------------------------------------------------------
@@ -163,10 +170,10 @@ COM_TX_ON:
 ;
 ; Entry:      C = Channel Index (0..1)
 ; Exit:       A = Tx State (FALSE = On, TRUE = Off)
-; Registers:  A,C 
+; Registers:  A,BC,HL
 ; ------------------------------------------------------------------------------
 COM_TX_STATE:
-	LD	A,(TX_STATE)
+	TBL_IDX	TX_STATE_TBL		; Load channel state to A
 	RET
 ; ------------------------------------------------------------------------------
 
