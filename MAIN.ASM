@@ -58,6 +58,10 @@ MAIN:
 
 	EI				; Enable interrupts
 
+	LD	C,STATUS_LED_PIO_CH	; Set status LED on
+	LD	B,0x01			; Set bit 0 to 1
+	CALL	PIO_WRITE
+
 	LD	DE,WELCOME_TXT		; Print welcome text
 	CALL	CONS_WRITE_STRING
 
@@ -93,6 +97,8 @@ WELCOME_TXT	DB	ASCII_FF,ASCII_BELL
 		DB	"J89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
 		DB	"Copyright (c) 2017 Jack Engqvist Johansson\r\n"
 		DB	ASCII_NULL
+
+STATUS_LED_PIO_CH	EQU	0x02
 
 ; ------------------------------------------------------------------------------
 ; END: Main Program
