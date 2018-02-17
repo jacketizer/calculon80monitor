@@ -93,10 +93,10 @@ ISR_COM_0:
 
 ; Constants
 ; ------------------------------------------------------------------------------
-WELCOME_TXT	DB	ASCII_FF,ASCII_BELL
+WELCOME_TXT	DB	ASCII_FF,ASCII_BEL
 		DB	"J89 Calculon/80 Microcomputer ROM Monitor Version 0.1\r\n"
 		DB	"Copyright (c) 2017 Jack Engqvist Johansson\r\n"
-		DB	ASCII_NULL
+		DB	ASCII_NUL
 
 STATUS_LED_PIO_CH	EQU	0x02
 
