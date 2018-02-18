@@ -33,10 +33,10 @@ STR_LEN:
 ; ------------------------------------------------------------------------------
 STR_CMP:
 	LD	A,(DE)		; Load test character
-	CPI			; Test it against HL, and increase HL
+	CPI			; Test it against (HL), and increase HL
 	RET	NZ		; Return if mismatch
 
-	AND	A		; Check for NULL
+	AND	A
 	RET	Z		; Return if NULL
 
 	INC	DE		; Next character
@@ -47,27 +47,21 @@ STR_CMP:
 ; Title:      Compare two strings with length limited by C
 ; Name:       STR_CMPN
 ;
-; Entry:      HL = Address to string A, DE = Address to string B, C = Max length
+; Entry:      HL = Address to string A, DE = Address to string B, BC = Max length
 ; Exit:       F = Zero set if equal, else Zero = 0
 ; Registers:  AF,BC,DE,HL
 ; ------------------------------------------------------------------------------
 STR_CMPN:
 	LD	A,(DE)		; Load test character
-	CPI			; Test it against HL, and increase HL
+	CPI			; Test it against (HL), and increase HL
 	RET	NZ		; Return if mismatch
+	RET	PO		; Return if BC is 0
 
-	AND	A		; Check for NULL
+	AND	A
 	RET	Z		; Return if NULL
 
-	DEC	C		; Check max length
-	JR	Z,STRCMPN_MAX
-
 	INC	DE		; Next character
-	JR	STR_CMP
-
-STRCMPN_MAX:
-	INC	C		; Increase C to 1 to set Zero to 0
-	RET
+	JR	STR_CMPN
 ; -----------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
