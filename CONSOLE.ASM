@@ -144,7 +144,15 @@ CONS_READ_LINE_ECHO:
 
 	LD	A,ASCII_CR		; Check for ENTER
 	CP	B
-	JP	Z,CONS_READ_ENTER
+	JP	Z,CONS_READ_END
+
+	LD	A,ASCII_BS		; Check for BACKSPACE
+	CP	B
+	JP	Z,CONS_READ_BACKSPACE
+
+	LD	A,ASCII_ESC		; Ignore ESC
+	CP	B
+	JP	Z,CONS_READ_LINE_ECHO
 
 	LD	A,B			; Store character
 	LD	(DE),A
@@ -155,7 +163,14 @@ CONS_READ_LINE_ECHO:
 
 	JP	CONS_READ_LINE_ECHO	; Read next...
 
-CONS_READ_ENTER:
+CONS_READ_BACKSPACE:
+	LD	B,ASCII_BS
+	CALL	CONS_WRITE_CHAR		; Send backspace
+
+	DEC	DE			; Decrement buffer pointer
+	JP	CONS_READ_LINE_ECHO	; Read next...
+
+CONS_READ_END:
 	XOR	A			; Null terminate buffer
 	LD	(DE),A
 
