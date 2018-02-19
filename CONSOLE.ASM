@@ -16,13 +16,12 @@ CONS_COM_CH	EQU	0x00		; Which COM channel to allocate
 
 ; Variables
 ; ------------------------------------------------------------------------------
+		BSS
 CONS_OUT_HEAD	DEFB	0x00		; Console buffer pointers
 CONS_OUT_TAIL	DEFB	0x00
 CONS_IN_HEAD	DEFB	0x00
 CONS_IN_TAIL	DEFB	0x00
 CONS_COM_STATUS	DEFB	0x00		; Temporary storage for COM status
-CONS_NEW_CHAR	DEFB	0x00
-		BSS
 		ALIGN	256		; Buffers needs to be page aligned
 CONS_OUTBUF	DEFS	0x100		; Console output buffer
 		ALIGN	256
@@ -80,6 +79,24 @@ BUF_ADV	MACRO	POINTER
 	ENDM
 
 ; ------------------------------------------------------------------------------
+; Title:      Initiate the CONSOLE driver
+; Name:       CONS_INIT
+;
+; Entry:      [No arguments]
+; Exit:       [No value]
+; Registers:  AF
+; ------------------------------------------------------------------------------
+CONS_INIT:
+	XOR	A
+	LD	(CONS_IN_TAIL),A
+	LD	(CONS_IN_HEAD),A
+	LD	(CONS_OUT_TAIL),A
+	LD	(CONS_OUT_HEAD),A
+	LD	(CONS_COM_STATUS),A
+	RET
+; ------------------------------------------------------------------------------
+
+; ------------------------------------------------------------------------------
 ; Title:      Write a character to the console
 ; Desc:       Write a character to the console at the current position. The
 ;             output is buffered by the driver and is therefore decoupled from
@@ -105,7 +122,7 @@ CONS_WRITE_CHAR:
 ; ------------------------------------------------------------------------------
 ; Title:      Read a character from the console
 ; Desc:       The input is buffered by the driver and is therefore decoupled
-;             from the hardware module.
+;             from the hardware.
 ; Name:       CONS_READ_CHAR
 ;
 ; Entry:      [No arguments]
@@ -113,14 +130,13 @@ CONS_WRITE_CHAR:
 ; Registers:  A,B,C,HL
 ; ------------------------------------------------------------------------------
 CONS_READ_CHAR:
-	LD	A,(CONS_NEW_CHAR)	; Check unread character flag
-	CP	0x00
-	JP	Z,CONS_READ_CHAR
+	LD	A,(CONS_IN_HEAD)	; Check if buffer is empty
+	LD	C,A
+	LD	A,(CONS_IN_TAIL)
+	CP	C
+	JP	Z,CONS_READ_CHAR	; Empty, check again
 
-	XOR	A			; Reset unread character flag
-	LD	(CONS_NEW_CHAR),A
-
-	LD	A,(CONS_IN_HEAD)	; Read character into buffer
+	LD	A,(CONS_IN_HEAD)	; Read character into variable buffer
 	LD	C,A
 	ITOADDR	IN,C
 	LD	B,(HL)
@@ -178,7 +194,7 @@ CONS_READ_END:
 ; ------------------------------------------------------------------------------
 
 ; ------------------------------------------------------------------------------
-; Title:      Write a string to the console
+; Title:      Write a NULL terminated string to the console
 ; Name:       CONS_WRITE_STRING
 ;
 ; Entry:      DE = Buffer pointer
@@ -249,9 +265,6 @@ CONS_ISR_RECEIVE:
 	ITOADDR	IN,A
 	LD	(HL),B
 	BUF_ADV	CONS_IN_TAIL
-
-	LD	A,0xFF
-	LD	(CONS_NEW_CHAR),A
 
 	RET
 ; ------------------------------------------------------------------------------

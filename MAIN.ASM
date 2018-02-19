@@ -38,6 +38,7 @@ MAIN:
 	CALL	ISR_INIT		; Set interrupt mode and register
 	CALL	CTC_INIT		; Initiate CTC driver
 	CALL	COM_INIT		; Initiate COM driver
+	CALL	CONS_INIT		; Initiate CONSOLE driver
 
 	LD	L,0x00			; Install ISR COM:0
 	LD	BC,ISR_COM_0
