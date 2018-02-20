@@ -8,6 +8,24 @@ programs from disk or serial device.
 This is a work in progress. While most of the drivers are complete, the HDD
 driver and utility programs are yet to be implemented.
 
+```
++--------------------------------------------------------------------------+
+| ROM MONITOR ARCHITECTURE                                                 |
++------------+-------------------------------------------------------------+
+| Libraries  | Applications                                                |
+|            |                                                             |
+| +--------+ | +-------+                                                   |
+| | ASCII  | | | SHELL |                                                   |
+| +--------+ | +-------+                                                   |
+| +--------+ +-------------------------------------------------------------+
+| | STRING | | Hardware Abstraction Layer                                  |
+| +--------+ |                                                             |
+| +--------+ | +-----+ +-----+ +-----+ +-----+ +-----+ +-----+ +---------+ |
+| | ANSI   | | | MEM | | ISR | | CTC | | PIO | | VDP | | COM | | CONSOLE | |
+| +--------+ | +-----+ +-----+ +-----+ +-----+ +-----+ +-----+ +---------+ |
++------------+-------------------------------------------------------------+
+```
+
 ROM Layout
 ----------
 
