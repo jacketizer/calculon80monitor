@@ -35,6 +35,9 @@ MAIN:
 	LD	SP,RAM_STACK		; Set stack pointer
 	CALL	MEM_ROM_OUT		; Switch out ROM
 
+; Init Stage 2
+; ..............................................................................
+
 	CALL	ISR_INIT		; Set interrupt mode and register
 	CALL	CTC_INIT		; Initiate CTC driver
 	CALL	COM_INIT		; Initiate COM driver
@@ -110,6 +113,7 @@ STATUS_LED_PIO_CH	EQU	0x02
 	include	"DEFINES.ASM"
 	include	"ASCII.ASM"
 	include	"STRING.ASM"
+	include	"ANSI.ASM"
 
 ; Driver Includes
 ; ------------------------------------------------------------------------------
